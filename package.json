@@ -1,5 +1,5 @@
 {
-  "name": "asistencia-nomina-app",
+  "name": "asistencia-nomina",
   "version": "1.0.0",
   "private": true,
   "scripts": {
@@ -8,11 +8,14 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@supabase/supabase-js": "^2.49.4",
     "react": "^18.2.0",
-    "react-dom": "^18.2.0"
+    "react-dom": "^18.2.0",
+    "@supabase/supabase-js": "^2.39.5"
   },
   "devDependencies": {
-    "vite": "^4.4.9"
+    "vite": "^4.0.0"
+  },
+  "engines": {
+    "node": ">=16"
   }
 }
