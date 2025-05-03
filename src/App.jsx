@@ -1,1 +1,1 @@
-// Aquí va el código de App.jsx con Supabase
+// Código de App.jsx aquí
