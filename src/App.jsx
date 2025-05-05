@@ -1,101 +1,100 @@
-// App conectado a Supabase con autenticación y registro
-import React, { useState, useEffect } from "react";
-import { createClient } from "@supabase/supabase-js";
+// App mejorado con dashboard estilizado y diseño más agradable
+import React, { useEffect, useState } from 'react';
+import { createClient } from '@supabase/supabase-js';
 
-// Inicializa Supabase
 const supabase = createClient(
   import.meta.env.VITE_SUPABASE_URL,
   import.meta.env.VITE_SUPABASE_ANON_KEY
 );
 
 export default function App() {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [usuario, setUsuario] = useState(null);
-  const [modoRegistro, setModoRegistro] = useState(false);
-  const [mensaje, setMensaje] = useState("");
-
-  const mostrarMensaje = (msg) => {
-    setMensaje(msg);
-    setTimeout(() => setMensaje(""), 3000);
-  };
-
-  const registrar = async () => {
-    const { data, error } = await supabase.auth.signUp({
-      email,
-      password,
-    });
-    if (error) return mostrarMensaje("❌ Error al registrar: " + error.message);
-    mostrarMensaje("✅ Registro exitoso. Revisa tu correo para confirmar.");
-  };
-
-  const login = async () => {
-    const { data, error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
-    if (error) return mostrarMensaje("❌ Usuario o contraseña incorrectos");
-    setUsuario(data.user);
-    mostrarMensaje("🔓 Sesión iniciada correctamente");
-  };
-
-  const logout = async () => {
-    await supabase.auth.signOut();
-    setUsuario(null);
-  };
+  const [user, setUser] = useState(null);
+  const [view, setView] = useState("login");
+  const [form, setForm] = useState({ email: "", password: "" });
 
   useEffect(() => {
-    supabase.auth.getUser().then(({ data: { user } }) => {
-      if (user) setUsuario(user);
+    supabase.auth.getUser().then(({ data }) => {
+      if (data.user) {
+        setUser(data.user);
+        setView("dashboard");
+      }
     });
   }, []);
 
-  if (!usuario) {
+  const handleLogin = async () => {
+    const { error, data } = await supabase.auth.signInWithPassword({
+      email: form.email,
+      password: form.password,
+    });
+    if (error) return alert("Error al iniciar sesión");
+    setUser(data.user);
+    setView("dashboard");
+  };
+
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+    setUser(null);
+    setView("login");
+  };
+
+  if (view === "login") {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-green-100">
-        <div className="bg-white p-6 rounded-xl shadow w-full max-w-sm space-y-3">
-          <h1 className="text-xl font-bold text-center">
-            {modoRegistro ? "Registro" : "Inicio de Sesión"}
-          </h1>
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-green-100 to-green-300">
+        <div className="bg-white p-8 rounded-2xl shadow-lg w-full max-w-sm space-y-4">
+          <h1 className="text-2xl font-bold text-center text-green-700">Iniciar Sesión</h1>
           <input
+            type="email"
             placeholder="Correo electrónico"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
             className="w-full p-2 border rounded"
+            value={form.email}
+            onChange={(e) => setForm({ ...form, email: e.target.value })}
           />
           <input
-            placeholder="Contraseña"
             type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
+            placeholder="Contraseña"
             className="w-full p-2 border rounded"
+            value={form.password}
+            onChange={(e) => setForm({ ...form, password: e.target.value })}
           />
           <button
-            onClick={modoRegistro ? registrar : login}
-            className="bg-green-500 text-white w-full p-2 rounded"
+            onClick={handleLogin}
+            className="w-full bg-green-600 hover:bg-green-700 text-white p-2 rounded"
           >
-            {modoRegistro ? "Registrar" : "Entrar"}
+            Entrar
           </button>
-          <button
-            onClick={() => setModoRegistro(!modoRegistro)}
-            className="text-blue-600 w-full text-sm"
-          >
-            {modoRegistro
-              ? "¿Ya tienes cuenta? Inicia sesión"
-              : "¿No tienes cuenta? Regístrate"}
-          </button>
-          {mensaje && <div className="text-center text-sm text-red-600">{mensaje}</div>}
         </div>
       </div>
     );
   }
 
-  return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-green-50 space-y-4">
-      <h1 className="text-2xl font-bold">Bienvenido, {usuario.email}</h1>
-      <button onClick={logout} className="bg-red-500 text-white px-4 py-2 rounded">
-        Cerrar sesión
-      </button>
-    </div>
-  );
+  if (view === "dashboard") {
+    return (
+      <div className="min-h-screen bg-green-50 p-6 space-y-6">
+        <div className="flex justify-between items-center">
+          <h1 className="text-xl font-bold text-green-700">Bienvenido, {user.email}</h1>
+          <button onClick={handleLogout} className="bg-red-500 text-white px-4 py-2 rounded">Cerrar sesión</button>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="bg-white p-4 rounded-xl shadow hover:shadow-md cursor-pointer">
+            <h2 className="text-lg font-semibold text-green-800">📋 Alta de empleados</h2>
+            <p className="text-sm text-gray-600">Registra nuevos empleados al sistema.</p>
+          </div>
+          <div className="bg-white p-4 rounded-xl shadow hover:shadow-md cursor-pointer">
+            <h2 className="text-lg font-semibold text-green-800">🔍 Consultar empleados</h2>
+            <p className="text-sm text-gray-600">Consulta y administra el personal registrado.</p>
+          </div>
+          <div className="bg-white p-4 rounded-xl shadow hover:shadow-md cursor-pointer">
+            <h2 className="text-lg font-semibold text-green-800">⚙️ Configuraciones</h2>
+            <p className="text-sm text-gray-600">Ajusta parámetros del sistema.</p>
+          </div>
+          <div className="bg-white p-4 rounded-xl shadow hover:shadow-md cursor-pointer">
+            <h2 className="text-lg font-semibold text-green-800">📁 Respaldos</h2>
+            <p className="text-sm text-gray-600">Descarga la información almacenada.</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  return null;
 }
