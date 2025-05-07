@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { createClient } from '@supabase/supabase-js';
+import AltaEmpleado from './AltaEmpleado';
 
 const supabase = createClient(
   import.meta.env.VITE_SUPABASE_URL,
@@ -10,19 +11,6 @@ export default function App() {
   const [user, setUser] = useState(null);
   const [view, setView] = useState("login");
   const [form, setForm] = useState({ email: "", password: "" });
-
-  const [empleado, setEmpleado] = useState({
-    numero_empleado: "",
-    nombres: "",
-    apellido_paterno: "",
-    apellido_materno: "",
-    sucursal: "Cabos",
-    fecha_ingreso: "",
-    sueldo_quincenal: "",
-    horas_extras: "",
-    puesto: "",
-  });
-
   const [empleados, setEmpleados] = useState([]);
   const [filtro, setFiltro] = useState("");
   const [empleadoSeleccionado, setEmpleadoSeleccionado] = useState(null);
@@ -52,27 +40,6 @@ export default function App() {
     await supabase.auth.signOut();
     setUser(null);
     setView("login");
-  };
-
-  const handleAltaEmpleado = async () => {
-    const { error } = await supabase.from("empleados").insert([empleado]);
-    if (error) {
-      alert("Error al guardar empleado");
-    } else {
-      alert("Empleado guardado correctamente");
-      setView("dashboard");
-      setEmpleado({
-        numero_empleado: "",
-        nombres: "",
-        apellido_paterno: "",
-        apellido_materno: "",
-        sucursal: "Cabos",
-        fecha_ingreso: "",
-        sueldo_quincenal: "",
-        horas_extras: "",
-        puesto: "",
-      });
-    }
   };
 
   const cargarEmpleados = async () => {
@@ -121,26 +88,7 @@ export default function App() {
   }
 
   if (view === "alta_empleado") {
-    return (
-      <div className="min-h-screen bg-green-50 p-6">
-        <button onClick={() => setView("dashboard")} className="mb-4 text-green-700 underline">← Volver al inicio</button>
-        <h2 className="text-2xl font-bold text-green-800 mb-4">Alta de empleado</h2>
-        <div className="grid gap-4 max-w-xl">
-          <input type="text" placeholder="Número de empleado" className="p-2 border rounded" value={empleado.numero_empleado} onChange={(e) => setEmpleado({ ...empleado, numero_empleado: e.target.value })} />
-          <input type="text" placeholder="Nombre(s)" className="p-2 border rounded" value={empleado.nombres} onChange={(e) => setEmpleado({ ...empleado, nombres: e.target.value })} />
-          <input type="text" placeholder="Apellido paterno" className="p-2 border rounded" value={empleado.apellido_paterno} onChange={(e) => setEmpleado({ ...empleado, apellido_paterno: e.target.value })} />
-          <input type="text" placeholder="Apellido materno" className="p-2 border rounded" value={empleado.apellido_materno} onChange={(e) => setEmpleado({ ...empleado, apellido_materno: e.target.value })} />
-          <select className="p-2 border rounded" value={empleado.sucursal} onChange={(e) => setEmpleado({ ...empleado, sucursal: e.target.value })}>
-            {sucursales.map((suc) => <option key={suc} value={suc}>{suc}</option>)}
-          </select>
-          <input type="date" className="p-2 border rounded" value={empleado.fecha_ingreso} onChange={(e) => setEmpleado({ ...empleado, fecha_ingreso: e.target.value })} />
-          <input type="number" placeholder="Sueldo quincenal" className="p-2 border rounded" value={empleado.sueldo_quincenal} onChange={(e) => setEmpleado({ ...empleado, sueldo_quincenal: e.target.value })} />
-          <input type="number" placeholder="Horas extras" className="p-2 border rounded" value={empleado.horas_extras} onChange={(e) => setEmpleado({ ...empleado, horas_extras: e.target.value })} />
-          <input type="text" placeholder="Puesto" className="p-2 border rounded" value={empleado.puesto} onChange={(e) => setEmpleado({ ...empleado, puesto: e.target.value })} />
-          <button onClick={handleAltaEmpleado} className="bg-green-700 text-white p-2 rounded hover:bg-green-800">Guardar empleado</button>
-        </div>
-      </div>
-    );
+    return <AltaEmpleado volver={() => setView("dashboard")} />;
   }
 
   if (view === "consulta_empleados") {
