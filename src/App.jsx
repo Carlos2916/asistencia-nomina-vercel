@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { createClient } from '@supabase/supabase-js';
 
@@ -108,26 +107,37 @@ export default function App() {
     );
   };
 
-  if (view === "cardex" && empleadoSeleccionado) {
+  if (view === "login") {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-green-100 to-green-300">
+        <div className="bg-white p-8 rounded-2xl shadow-lg w-full max-w-sm space-y-4">
+          <h1 className="text-2xl font-bold text-center text-green-700">Iniciar Sesión</h1>
+          <input type="email" placeholder="Correo electrónico" className="w-full p-2 border rounded" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} />
+          <input type="password" placeholder="Contraseña" className="w-full p-2 border rounded" value={form.password} onChange={(e) => setForm({ ...form, password: e.target.value })} />
+          <button onClick={handleLogin} className="w-full bg-green-600 hover:bg-green-700 text-white p-2 rounded">Entrar</button>
+        </div>
+      </div>
+    );
+  }
+
+  if (view === "alta_empleado") {
     return (
       <div className="min-h-screen bg-green-50 p-6">
-        <button onClick={() => setView("consulta_empleados")} className="mb-4 text-green-700 underline">← Volver</button>
-        <h2 className="text-2xl font-bold text-green-800 mb-4">Editar Empleado</h2>
+        <button onClick={() => setView("dashboard")} className="mb-4 text-green-700 underline">← Volver al inicio</button>
+        <h2 className="text-2xl font-bold text-green-800 mb-4">Alta de empleado</h2>
         <div className="grid gap-4 max-w-xl">
-          <input type="text" className="p-2 border rounded" value={empleadoSeleccionado.numero_empleado} onChange={(e) => setEmpleadoSeleccionado({ ...empleadoSeleccionado, numero_empleado: e.target.value })} placeholder="Número de empleado" />
-          <input type="text" className="p-2 border rounded" value={empleadoSeleccionado.nombres} onChange={(e) => setEmpleadoSeleccionado({ ...empleadoSeleccionado, nombres: e.target.value })} placeholder="Nombre(s)" />
-          <input type="text" className="p-2 border rounded" value={empleadoSeleccionado.apellido_paterno} onChange={(e) => setEmpleadoSeleccionado({ ...empleadoSeleccionado, apellido_paterno: e.target.value })} placeholder="Apellido paterno" />
-          <input type="text" className="p-2 border rounded" value={empleadoSeleccionado.apellido_materno} onChange={(e) => setEmpleadoSeleccionado({ ...empleadoSeleccionado, apellido_materno: e.target.value })} placeholder="Apellido materno" />
-          <select className="p-2 border rounded" value={empleadoSeleccionado.sucursal} onChange={(e) => setEmpleadoSeleccionado({ ...empleadoSeleccionado, sucursal: e.target.value })}>
-            {sucursales.map((suc) => (
-              <option key={suc} value={suc}>{suc}</option>
-            ))}
+          <input type="text" placeholder="Número de empleado" className="p-2 border rounded" value={empleado.numero_empleado} onChange={(e) => setEmpleado({ ...empleado, numero_empleado: e.target.value })} />
+          <input type="text" placeholder="Nombre(s)" className="p-2 border rounded" value={empleado.nombres} onChange={(e) => setEmpleado({ ...empleado, nombres: e.target.value })} />
+          <input type="text" placeholder="Apellido paterno" className="p-2 border rounded" value={empleado.apellido_paterno} onChange={(e) => setEmpleado({ ...empleado, apellido_paterno: e.target.value })} />
+          <input type="text" placeholder="Apellido materno" className="p-2 border rounded" value={empleado.apellido_materno} onChange={(e) => setEmpleado({ ...empleado, apellido_materno: e.target.value })} />
+          <select className="p-2 border rounded" value={empleado.sucursal} onChange={(e) => setEmpleado({ ...empleado, sucursal: e.target.value })}>
+            {sucursales.map((suc) => <option key={suc} value={suc}>{suc}</option>)}
           </select>
-          <input type="date" className="p-2 border rounded" value={empleadoSeleccionado.fecha_ingreso} onChange={(e) => setEmpleadoSeleccionado({ ...empleadoSeleccionado, fecha_ingreso: e.target.value })} />
-          <input type="number" className="p-2 border rounded" value={empleadoSeleccionado.sueldo_quincenal} onChange={(e) => setEmpleadoSeleccionado({ ...empleadoSeleccionado, sueldo_quincenal: e.target.value })} placeholder="Sueldo quincenal" />
-          <input type="number" className="p-2 border rounded" value={empleadoSeleccionado.horas_extras} onChange={(e) => setEmpleadoSeleccionado({ ...empleadoSeleccionado, horas_extras: e.target.value })} placeholder="Horas extras" />
-          <input type="text" className="p-2 border rounded" value={empleadoSeleccionado.puesto} onChange={(e) => setEmpleadoSeleccionado({ ...empleadoSeleccionado, puesto: e.target.value })} placeholder="Puesto" />
-          <button onClick={actualizarEmpleado} className="bg-green-700 text-white p-2 rounded hover:bg-green-800">Guardar cambios</button>
+          <input type="date" className="p-2 border rounded" value={empleado.fecha_ingreso} onChange={(e) => setEmpleado({ ...empleado, fecha_ingreso: e.target.value })} />
+          <input type="number" placeholder="Sueldo quincenal" className="p-2 border rounded" value={empleado.sueldo_quincenal} onChange={(e) => setEmpleado({ ...empleado, sueldo_quincenal: e.target.value })} />
+          <input type="number" placeholder="Horas extras" className="p-2 border rounded" value={empleado.horas_extras} onChange={(e) => setEmpleado({ ...empleado, horas_extras: e.target.value })} />
+          <input type="text" placeholder="Puesto" className="p-2 border rounded" value={empleado.puesto} onChange={(e) => setEmpleado({ ...empleado, puesto: e.target.value })} />
+          <button onClick={handleAltaEmpleado} className="bg-green-700 text-white p-2 rounded hover:bg-green-800">Guardar empleado</button>
         </div>
       </div>
     );
@@ -141,7 +151,7 @@ export default function App() {
         <input type="text" className="p-2 mb-4 w-full max-w-md border rounded" placeholder="Buscar por cualquier campo" value={filtro} onChange={(e) => setFiltro(e.target.value)} />
         <div className="grid gap-4">
           {empleados.filter(filtrar).map((emp) => (
-            <div key={emp.id} onClick={() => { setEmpleadoSeleccionado(emp); setView("cardex"); }} className="bg-white p-4 rounded-xl shadow hover:shadow-md transition cursor-pointer space-y-1">
+            <div key={emp.id} onClick={() => { setEmpleadoSeleccionado(emp); setView("cardex"); }} className="bg-white p-4 rounded-xl shadow hover:shadow-md cursor-pointer space-y-1">
               <div className="font-bold text-lg text-green-800">👤 {emp.nombres} {emp.apellido_paterno} {emp.apellido_materno}</div>
               <div className="text-sm text-gray-600">🧾 Número: {emp.numero_empleado} • Puesto: {emp.puesto}</div>
               <div className="text-sm text-gray-600">🏢 Sucursal: {emp.sucursal}</div>
@@ -149,6 +159,29 @@ export default function App() {
               <div className="text-sm text-gray-600">📅 Ingreso: {emp.fecha_ingreso}</div>
             </div>
           ))}
+        </div>
+      </div>
+    );
+  }
+
+  if (view === "cardex" && empleadoSeleccionado) {
+    return (
+      <div className="min-h-screen bg-green-50 p-6">
+        <button onClick={() => setView("consulta_empleados")} className="mb-4 text-green-700 underline">← Volver</button>
+        <h2 className="text-2xl font-bold text-green-800 mb-4">Editar Empleado</h2>
+        <div className="grid gap-4 max-w-xl">
+          <input type="text" className="p-2 border rounded" value={empleadoSeleccionado.numero_empleado} onChange={(e) => setEmpleadoSeleccionado({ ...empleadoSeleccionado, numero_empleado: e.target.value })} placeholder="Número de empleado" />
+          <input type="text" className="p-2 border rounded" value={empleadoSeleccionado.nombres} onChange={(e) => setEmpleadoSeleccionado({ ...empleadoSeleccionado, nombres: e.target.value })} placeholder="Nombre(s)" />
+          <input type="text" className="p-2 border rounded" value={empleadoSeleccionado.apellido_paterno} onChange={(e) => setEmpleadoSeleccionado({ ...empleadoSeleccionado, apellido_paterno: e.target.value })} placeholder="Apellido paterno" />
+          <input type="text" className="p-2 border rounded" value={empleadoSeleccionado.apellido_materno} onChange={(e) => setEmpleadoSeleccionado({ ...empleadoSeleccionado, apellido_materno: e.target.value })} placeholder="Apellido materno" />
+          <select className="p-2 border rounded" value={empleadoSeleccionado.sucursal} onChange={(e) => setEmpleadoSeleccionado({ ...empleadoSeleccionado, sucursal: e.target.value })}>
+            {sucursales.map((suc) => <option key={suc} value={suc}>{suc}</option>)}
+          </select>
+          <input type="date" className="p-2 border rounded" value={empleadoSeleccionado.fecha_ingreso} onChange={(e) => setEmpleadoSeleccionado({ ...empleadoSeleccionado, fecha_ingreso: e.target.value })} />
+          <input type="number" className="p-2 border rounded" value={empleadoSeleccionado.sueldo_quincenal} onChange={(e) => setEmpleadoSeleccionado({ ...empleadoSeleccionado, sueldo_quincenal: e.target.value })} placeholder="Sueldo quincenal" />
+          <input type="number" className="p-2 border rounded" value={empleadoSeleccionado.horas_extras} onChange={(e) => setEmpleadoSeleccionado({ ...empleadoSeleccionado, horas_extras: e.target.value })} placeholder="Horas extras" />
+          <input type="text" className="p-2 border rounded" value={empleadoSeleccionado.puesto} onChange={(e) => setEmpleadoSeleccionado({ ...empleadoSeleccionado, puesto: e.target.value })} placeholder="Puesto" />
+          <button onClick={actualizarEmpleado} className="bg-green-700 text-white p-2 rounded hover:bg-green-800">Guardar cambios</button>
         </div>
       </div>
     );
