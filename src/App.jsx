@@ -62,6 +62,23 @@ export default function App() {
     }
   };
 
+  const eliminarEmpleado = async () => {
+    if (!confirm("¿Estás seguro de eliminar este empleado?")) return;
+    const { error } = await supabase
+      .from("empleados")
+      .delete()
+      .eq("id", empleadoSeleccionado.id);
+    if (error) {
+      alert("Error al eliminar empleado");
+      console.log(error);
+    } else {
+      alert("Empleado eliminado correctamente");
+      setEmpleadoSeleccionado(null);
+      cargarEmpleados();
+      setView("consulta_empleados");
+    }
+  };
+
   const filtrar = (emp) => {
     const texto = filtro.toLowerCase();
     return (
@@ -113,21 +130,20 @@ export default function App() {
   }
 
   if (view === "cardex" && empleadoSeleccionado) {
-  return (
-    <div className="min-h-screen bg-green-50 p-6">
-      <button onClick={() => setView("consulta_empleados")} className="mb-4 text-green-700 underline">← Volver</button>
-      <h2 className="text-2xl font-bold text-green-800 mb-4">Editar Empleado</h2>
-      <div className="grid gap-4 max-w-xl">
-        {empleadoSeleccionado.foto_url && (
-          <div className="mb-4">
-            <img
-              src={empleadoSeleccionado.foto_url}
-              alt="Foto del empleado"
-              className="w-32 h-32 object-cover rounded-full border"
-            />
-          </div>
-        )}
-
+    return (
+      <div className="min-h-screen bg-green-50 p-6">
+        <button onClick={() => setView("consulta_empleados")} className="mb-4 text-green-700 underline">← Volver</button>
+        <h2 className="text-2xl font-bold text-green-800 mb-4">Editar Empleado</h2>
+        <div className="grid gap-4 max-w-xl">
+          {empleadoSeleccionado.foto_url && (
+            <div className="mb-4">
+              <img
+                src={empleadoSeleccionado.foto_url}
+                alt="Foto del empleado"
+                className="w-32 h-32 object-cover rounded-full border"
+              />
+            </div>
+          )}
           <input type="text" className="p-2 border rounded" value={empleadoSeleccionado.numero_empleado} onChange={(e) => setEmpleadoSeleccionado({ ...empleadoSeleccionado, numero_empleado: e.target.value })} placeholder="Número de empleado" />
           <input type="text" className="p-2 border rounded" value={empleadoSeleccionado.nombres} onChange={(e) => setEmpleadoSeleccionado({ ...empleadoSeleccionado, nombres: e.target.value })} placeholder="Nombre(s)" />
           <input type="text" className="p-2 border rounded" value={empleadoSeleccionado.apellido_paterno} onChange={(e) => setEmpleadoSeleccionado({ ...empleadoSeleccionado, apellido_paterno: e.target.value })} placeholder="Apellido paterno" />
@@ -140,6 +156,7 @@ export default function App() {
           <input type="number" className="p-2 border rounded" value={empleadoSeleccionado.horas_extras} onChange={(e) => setEmpleadoSeleccionado({ ...empleadoSeleccionado, horas_extras: e.target.value })} placeholder="Horas extras" />
           <input type="text" className="p-2 border rounded" value={empleadoSeleccionado.puesto} onChange={(e) => setEmpleadoSeleccionado({ ...empleadoSeleccionado, puesto: e.target.value })} placeholder="Puesto" />
           <button onClick={actualizarEmpleado} className="bg-green-700 text-white p-2 rounded hover:bg-green-800">Guardar cambios</button>
+          <button onClick={eliminarEmpleado} className="bg-red-600 text-white p-2 rounded hover:bg-red-700">Eliminar empleado</button>
         </div>
       </div>
     );
