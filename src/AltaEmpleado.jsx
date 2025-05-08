@@ -3,7 +3,7 @@ const handleAltaEmpleado = async () => {
 
   const nombreArchivo = `${empleado.numero_empleado}.jpg`;
   const { error: uploadError } = await supabase.storage
-    .from("empleados_fotos")
+    .from("empleados-fotos")
     .upload(nombreArchivo, empleadoFoto, { upsert: true });
 
   if (uploadError) {
@@ -12,7 +12,7 @@ const handleAltaEmpleado = async () => {
   }
 
   const { data: { publicUrl } } = supabase.storage
-    .from("empleados_fotos")
+    .from("empleados-fotos")
     .getPublicUrl(nombreArchivo);
 
   const nuevoEmpleado = { ...empleado, foto_url: publicUrl };
