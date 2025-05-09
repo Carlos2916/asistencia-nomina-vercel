@@ -12,6 +12,7 @@ export default function AltaEmpleado({ volver }) {
     nombres: "",
     apellido_paterno: "",
     apellido_materno: "",
+    sexo: "", // 👈 nuevo campo
     sucursal: "Cabos",
     fecha_ingreso: "",
     sueldo_quincenal: "",
@@ -22,6 +23,7 @@ export default function AltaEmpleado({ volver }) {
   const [empleadoFoto, setEmpleadoFoto] = useState(null);
 
   const sucursales = ["Cabos", "Costa", "Bonfil", "Puerto", "Cedis", "Administrativo"];
+  const puestos = ["Gerente", "Supervisor", "Vendedor", "Chofer", "Almacenista", "Administrativo"]; // puedes editar esta lista
 
   const handleAltaEmpleado = async () => {
     if (!empleadoFoto) return alert("Por favor selecciona una foto");
@@ -40,7 +42,11 @@ export default function AltaEmpleado({ volver }) {
       .from("empleadosfotos")
       .getPublicUrl(nombreArchivo);
 
-    const nuevoEmpleado = { ...empleado, foto_url: publicUrl };
+    const nuevoEmpleado = {
+      ...empleado,
+      foto_url: publicUrl,
+      sexo: empleado.sexo.toUpperCase(), // 👈 aseguramos que se guarde en mayúsculas
+    };
 
     const { error } = await supabase.from("empleados").insert([nuevoEmpleado]);
 
@@ -62,13 +68,29 @@ export default function AltaEmpleado({ volver }) {
         <input type="text" placeholder="Nombre(s)" className="p-2 border rounded" value={empleado.nombres} onChange={(e) => setEmpleado({ ...empleado, nombres: e.target.value })} />
         <input type="text" placeholder="Apellido paterno" className="p-2 border rounded" value={empleado.apellido_paterno} onChange={(e) => setEmpleado({ ...empleado, apellido_paterno: e.target.value })} />
         <input type="text" placeholder="Apellido materno" className="p-2 border rounded" value={empleado.apellido_materno} onChange={(e) => setEmpleado({ ...empleado, apellido_materno: e.target.value })} />
+
+        {/* SEXO */}
+        <select className="p-2 border rounded" value={empleado.sexo} onChange={(e) => setEmpleado({ ...empleado, sexo: e.target.value })}>
+          <option value="">Selecciona sexo</option>
+          <option value="HOMBRE">HOMBRE</option>
+          <option value="MUJER">MUJER</option>
+        </select>
+
+        {/* SUCURSAL */}
         <select className="p-2 border rounded" value={empleado.sucursal} onChange={(e) => setEmpleado({ ...empleado, sucursal: e.target.value })}>
           {sucursales.map((suc) => <option key={suc} value={suc}>{suc}</option>)}
         </select>
+
         <input type="date" className="p-2 border rounded" value={empleado.fecha_ingreso} onChange={(e) => setEmpleado({ ...empleado, fecha_ingreso: e.target.value })} />
         <input type="number" placeholder="Sueldo quincenal" className="p-2 border rounded" value={empleado.sueldo_quincenal} onChange={(e) => setEmpleado({ ...empleado, sueldo_quincenal: e.target.value })} />
         <input type="number" placeholder="Horas extras" className="p-2 border rounded" value={empleado.horas_extras} onChange={(e) => setEmpleado({ ...empleado, horas_extras: e.target.value })} />
-        <input type="text" placeholder="Puesto" className="p-2 border rounded" value={empleado.puesto} onChange={(e) => setEmpleado({ ...empleado, puesto: e.target.value })} />
+
+        {/* PUESTO CON MENÚ DESPLEGABLE (Paso 3 si quieres activarlo) */}
+        <select className="p-2 border rounded" value={empleado.puesto} onChange={(e) => setEmpleado({ ...empleado, puesto: e.target.value })}>
+          <option value="">Selecciona puesto</option>
+          {puestos.map((p) => <option key={p} value={p}>{p}</option>)}
+        </select>
+
         <input type="file" accept="image/*" onChange={(e) => setEmpleadoFoto(e.target.files[0])} />
         <button onClick={handleAltaEmpleado} className="bg-green-700 text-white p-2 rounded hover:bg-green-800">Guardar empleado</button>
       </div>
