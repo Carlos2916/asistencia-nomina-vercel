@@ -1,5 +1,5 @@
-// Justo dentro de tu componente App
-const [nuevaFoto, setNuevaFoto] = useState(null); // ✅ Debe estar aquí
+// Dentro de export default function App() {
+const [nuevaFoto, setNuevaFoto] = useState(null); // ✅ Correcto
 
 const actualizarEmpleado = async () => {
   let foto_url = empleadoSeleccionado.foto_url;
@@ -39,6 +39,7 @@ const actualizarEmpleado = async () => {
   }
 };
 
+// Luego viene esta parte ↓
 if (view === "cardex" && empleadoSeleccionado) {
   return (
     <div className="min-h-screen bg-green-50 p-6">
