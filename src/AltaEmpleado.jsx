@@ -12,7 +12,7 @@ export default function AltaEmpleado({ volver }) {
     nombres: "",
     apellido_paterno: "",
     apellido_materno: "",
-    sexo: "", // 👈 nuevo campo
+    sexo: "",
     sucursal: "Cabos",
     fecha_ingreso: "",
     sueldo_quincenal: "",
@@ -23,7 +23,7 @@ export default function AltaEmpleado({ volver }) {
   const [empleadoFoto, setEmpleadoFoto] = useState(null);
 
   const sucursales = ["Cabos", "Costa", "Bonfil", "Puerto", "Cedis", "Cedis Adm"];
-  const puestos = ["Gerente", "Supervisor", "Vendedor", "Chofer", "Almacenista", "Administrativo"]; // puedes editar esta lista
+  const puestos = ["Gerente", "Supervisor", "Vendedor", "Chofer", "Almacenista", "Administrativo"];
 
   const handleAltaEmpleado = async () => {
     if (!empleadoFoto) return alert("Por favor selecciona una foto");
@@ -38,24 +38,29 @@ export default function AltaEmpleado({ volver }) {
       return alert("Error al subir la foto");
     }
 
-    const { data: { publicUrl } } = supabase.storage
+    // 🔐 Crear URL firmada protegida (válida 1 hora)
+    const { data, error: urlError } = await supabase.storage
       .from("empleadosfotos")
-      .getPublicUrl(nombreArchivo);
-const camposTexto = ["nombres", "apellido_paterno", "apellido_materno", "sexo", "puesto", "sucursal"];
-const empleadoFormateado = { ...empleado };
+      .createSignedUrl(nombreArchivo, 3600);
 
-// Convertimos a mayúsculas solo los campos de texto
-camposTexto.forEach((campo) => {
-  if (empleadoFormateado[campo]) {
-    empleadoFormateado[campo] = empleadoFormateado[campo].toUpperCase();
-  }
-});
+    if (urlError) {
+      console.log(urlError);
+      return alert("Error al generar URL de imagen");
+    }
 
- const nuevoEmpleado = {
-  ...empleadoFormateado,
-  foto_url: publicUrl,
-};
+    // Formatear campos a mayúscula
+    const camposTexto = ["nombres", "apellido_paterno", "apellido_materno", "sexo", "puesto", "sucursal"];
+    const empleadoFormateado = { ...empleado };
+    camposTexto.forEach((campo) => {
+      if (empleadoFormateado[campo]) {
+        empleadoFormateado[campo] = empleadoFormateado[campo].toUpperCase();
+      }
+    });
 
+    const nuevoEmpleado = {
+      ...empleadoFormateado,
+      foto_url: data.signedUrl,
+    };
 
     const { error } = await supabase.from("empleados").insert([nuevoEmpleado]);
 
@@ -78,14 +83,12 @@ camposTexto.forEach((campo) => {
         <input type="text" placeholder="Apellido paterno" className="p-2 border rounded" value={empleado.apellido_paterno} onChange={(e) => setEmpleado({ ...empleado, apellido_paterno: e.target.value })} />
         <input type="text" placeholder="Apellido materno" className="p-2 border rounded" value={empleado.apellido_materno} onChange={(e) => setEmpleado({ ...empleado, apellido_materno: e.target.value })} />
 
-        {/* SEXO */}
         <select className="p-2 border rounded" value={empleado.sexo} onChange={(e) => setEmpleado({ ...empleado, sexo: e.target.value })}>
           <option value="">Selecciona sexo</option>
           <option value="Hombre">Hombre</option>
           <option value="Mujer">Mujer</option>
         </select>
 
-        {/* SUCURSAL */}
         <select className="p-2 border rounded" value={empleado.sucursal} onChange={(e) => setEmpleado({ ...empleado, sucursal: e.target.value })}>
           {sucursales.map((suc) => <option key={suc} value={suc}>{suc}</option>)}
         </select>
@@ -94,7 +97,6 @@ camposTexto.forEach((campo) => {
         <input type="number" placeholder="Sueldo quincenal" className="p-2 border rounded" value={empleado.sueldo_quincenal} onChange={(e) => setEmpleado({ ...empleado, sueldo_quincenal: e.target.value })} />
         <input type="number" placeholder="Horas extras" className="p-2 border rounded" value={empleado.horas_extras} onChange={(e) => setEmpleado({ ...empleado, horas_extras: e.target.value })} />
 
-        {/* PUESTO CON MENÚ DESPLEGABLE (Paso 3 si quieres activarlo) */}
         <select className="p-2 border rounded" value={empleado.puesto} onChange={(e) => setEmpleado({ ...empleado, puesto: e.target.value })}>
           <option value="">Selecciona puesto</option>
           {puestos.map((p) => <option key={p} value={p}>{p}</option>)}

@@ -63,11 +63,16 @@ export default function App() {
         return;
       }
 
-      const { data: { publicUrl } } = supabase.storage
+      const { data, error: urlError } = await supabase.storage
         .from("empleadosfotos")
-        .getPublicUrl(nombreArchivo);
+        .createSignedUrl(nombreArchivo, 3600);
 
-      foto_url = publicUrl;
+      if (urlError) {
+        alert("Error al generar nueva URL de foto");
+        return;
+      }
+
+      foto_url = data.signedUrl;
     }
 
     const actualizado = { ...empleadoSeleccionado, foto_url };
@@ -162,11 +167,7 @@ export default function App() {
             </div>
           )}
           <label className="text-sm font-medium text-gray-700">Actualizar o agregar nueva foto</label>
-          <input
-            type="file"
-            accept="image/*"
-            onChange={(e) => setNuevaFoto(e.target.files[0])}
-          />
+          <input type="file" accept="image/*" onChange={(e) => setNuevaFoto(e.target.files[0])} />
           <input type="text" className="p-2 border rounded" value={empleadoSeleccionado.numero_empleado} onChange={(e) => setEmpleadoSeleccionado({ ...empleadoSeleccionado, numero_empleado: e.target.value })} placeholder="Número de empleado" />
           <input type="text" className="p-2 border rounded" value={empleadoSeleccionado.nombres} onChange={(e) => setEmpleadoSeleccionado({ ...empleadoSeleccionado, nombres: e.target.value })} placeholder="Nombre(s)" />
           <input type="text" className="p-2 border rounded" value={empleadoSeleccionado.apellido_paterno} onChange={(e) => setEmpleadoSeleccionado({ ...empleadoSeleccionado, apellido_paterno: e.target.value })} placeholder="Apellido paterno" />
@@ -178,16 +179,7 @@ export default function App() {
           <input type="number" className="p-2 border rounded" value={empleadoSeleccionado.sueldo_quincenal} onChange={(e) => setEmpleadoSeleccionado({ ...empleadoSeleccionado, sueldo_quincenal: e.target.value })} placeholder="Sueldo quincenal" />
           <input type="number" className="p-2 border rounded" value={empleadoSeleccionado.horas_extras} onChange={(e) => setEmpleadoSeleccionado({ ...empleadoSeleccionado, horas_extras: e.target.value })} placeholder="Horas extras" />
           <input type="text" className="p-2 border rounded" value={empleadoSeleccionado.puesto} onChange={(e) => setEmpleadoSeleccionado({ ...empleadoSeleccionado, puesto: e.target.value })} placeholder="Puesto" />
-          <select
-            className="p-2 border rounded"
-            value={empleadoSeleccionado.sexo || ""}
-            onChange={(e) =>
-              setEmpleadoSeleccionado({
-                ...empleadoSeleccionado,
-                sexo: e.target.value,
-              })
-            }
-          >
+          <select className="p-2 border rounded" value={empleadoSeleccionado.sexo || ""} onChange={(e) => setEmpleadoSeleccionado({ ...empleadoSeleccionado, sexo: e.target.value })}>
             <option value="">Selecciona sexo</option>
             <option value="MASCULINO">MASCULINO</option>
             <option value="FEMENINO">FEMENINO</option>
