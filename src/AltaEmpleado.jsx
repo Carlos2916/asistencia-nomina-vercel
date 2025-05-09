@@ -22,7 +22,7 @@ export default function AltaEmpleado({ volver }) {
 
   const [empleadoFoto, setEmpleadoFoto] = useState(null);
 
-  const sucursales = ["Cabos", "Costa", "Bonfil", "Puerto", "Cedis", "Administrativo"];
+  const sucursales = ["Cabos", "Costa", "Bonfil", "Puerto", "Cedis", "Cedis Adm"];
   const puestos = ["Gerente", "Supervisor", "Vendedor", "Chofer", "Almacenista", "Administrativo"]; // puedes editar esta lista
 
   const handleAltaEmpleado = async () => {
@@ -72,8 +72,8 @@ export default function AltaEmpleado({ volver }) {
         {/* SEXO */}
         <select className="p-2 border rounded" value={empleado.sexo} onChange={(e) => setEmpleado({ ...empleado, sexo: e.target.value })}>
           <option value="">Selecciona sexo</option>
-          <option value="HOMBRE">HOMBRE</option>
-          <option value="MUJER">MUJER</option>
+          <option value="Hombre">Hombre</option>
+          <option value="Mujer">Mujer</option>
         </select>
 
         {/* SUCURSAL */}
