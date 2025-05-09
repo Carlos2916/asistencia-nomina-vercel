@@ -15,7 +15,7 @@ export default function App() {
   const [empleados, setEmpleados] = useState([]);
   const [filtro, setFiltro] = useState("");
   const [empleadoSeleccionado, setEmpleadoSeleccionado] = useState(null);
-  const [nuevaFoto, setNuevaFoto] = useState(null); // Paso 6 ✅
+  const [nuevaFoto, setNuevaFoto] = useState(null);
 
   const sucursales = ["Cabos", "Costa", "Bonfil", "Puerto", "Cedis", "Administrativo"];
 
@@ -178,6 +178,20 @@ export default function App() {
           <input type="number" className="p-2 border rounded" value={empleadoSeleccionado.sueldo_quincenal} onChange={(e) => setEmpleadoSeleccionado({ ...empleadoSeleccionado, sueldo_quincenal: e.target.value })} placeholder="Sueldo quincenal" />
           <input type="number" className="p-2 border rounded" value={empleadoSeleccionado.horas_extras} onChange={(e) => setEmpleadoSeleccionado({ ...empleadoSeleccionado, horas_extras: e.target.value })} placeholder="Horas extras" />
           <input type="text" className="p-2 border rounded" value={empleadoSeleccionado.puesto} onChange={(e) => setEmpleadoSeleccionado({ ...empleadoSeleccionado, puesto: e.target.value })} placeholder="Puesto" />
+          <select
+            className="p-2 border rounded"
+            value={empleadoSeleccionado.sexo || ""}
+            onChange={(e) =>
+              setEmpleadoSeleccionado({
+                ...empleadoSeleccionado,
+                sexo: e.target.value,
+              })
+            }
+          >
+            <option value="">Selecciona sexo</option>
+            <option value="MASCULINO">MASCULINO</option>
+            <option value="FEMENINO">FEMENINO</option>
+          </select>
           <button onClick={actualizarEmpleado} className="bg-green-700 text-white p-2 rounded hover:bg-green-800">Guardar cambios</button>
           <button onClick={eliminarEmpleado} className="bg-red-600 text-white p-2 rounded hover:bg-red-700">Eliminar empleado</button>
         </div>
