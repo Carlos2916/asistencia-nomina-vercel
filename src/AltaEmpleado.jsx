@@ -41,12 +41,21 @@ export default function AltaEmpleado({ volver }) {
     const { data: { publicUrl } } = supabase.storage
       .from("empleadosfotos")
       .getPublicUrl(nombreArchivo);
+const camposTexto = ["nombres", "apellido_paterno", "apellido_materno", "sexo", "puesto", "sucursal"];
+const empleadoFormateado = { ...empleado };
 
-    const nuevoEmpleado = {
-      ...empleado,
-      foto_url: publicUrl,
-      sexo: empleado.sexo.toUpperCase(), // 👈 aseguramos que se guarde en mayúsculas
-    };
+// Convertimos a mayúsculas solo los campos de texto
+camposTexto.forEach((campo) => {
+  if (empleadoFormateado[campo]) {
+    empleadoFormateado[campo] = empleadoFormateado[campo].toUpperCase();
+  }
+});
+
+ const nuevoEmpleado = {
+  ...empleadoFormateado,
+  foto_url: publicUrl,
+};
+
 
     const { error } = await supabase.from("empleados").insert([nuevoEmpleado]);
 

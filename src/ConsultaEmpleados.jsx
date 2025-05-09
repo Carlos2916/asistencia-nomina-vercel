@@ -41,10 +41,10 @@ export default function ConsultaEmpleados({
                 👤 {emp.nombres} {emp.apellido_paterno} {emp.apellido_materno}
               </div>
               <div className="text-sm text-gray-600">
-                🧾 Número: {emp.numero_empleado} • Puesto: {emp.puesto}
+                🧾 Número: {emp.numero_empleado} • Sexo: {emp.sexo}
               </div>
               <div className="text-sm text-gray-600">
-                🏢 Sucursal: {emp.sucursal}
+                🧑‍💼 Puesto: {emp.puesto} • 🏢 Sucursal: {emp.sucursal}
               </div>
               <div className="text-sm text-gray-600">
                 💵 Sueldo: ${emp.sueldo_quincenal} • Extras: ${emp.horas_extras}
