@@ -1,4 +1,24 @@
 import React from 'react';
+import dayjs from 'dayjs';
+import duration from 'dayjs/plugin/duration';
+dayjs.extend(duration);
+
+// Función para calcular tiempo trabajado
+function calcularTiempoTrabajado(fechaIngreso) {
+  const inicio = dayjs(fechaIngreso);
+  const hoy = dayjs();
+  const totalDias = hoy.diff(inicio, 'day');
+
+  const años = Math.floor(totalDias / 365);
+  const meses = Math.floor((totalDias % 365) / 30);
+  const dias = totalDias % 30;
+
+  if (años > 0) {
+    return `${años} año(s), ${meses} mes(es)`;
+  } else {
+    return `${meses} mes(es), ${dias} día(s)`;
+  }
+}
 
 export default function ConsultaEmpleados({
   empleados,
@@ -51,6 +71,9 @@ export default function ConsultaEmpleados({
               </div>
               <div className="text-sm text-gray-600">
                 📅 Ingreso: {emp.fecha_ingreso}
+              </div>
+              <div className="text-sm text-blue-600">
+                ⏳ Tiempo trabajado: {calcularTiempoTrabajado(emp.fecha_ingreso)}
               </div>
             </div>
           </div>
