@@ -75,7 +75,15 @@ export default function App() {
       foto_url = data.signedUrl;
     }
 
-    const actualizado = { ...empleadoSeleccionado, foto_url };
+    const camposTexto = ["nombres", "apellido_paterno", "apellido_materno", "sexo", "puesto", "sucursal"];
+    const empleadoFormateado = { ...empleadoSeleccionado };
+    camposTexto.forEach((campo) => {
+      if (empleadoFormateado[campo]) {
+        empleadoFormateado[campo] = empleadoFormateado[campo].toUpperCase();
+      }
+    });
+
+    const actualizado = { ...empleadoFormateado, foto_url };
 
     const { error } = await supabase
       .from("empleados")
@@ -152,6 +160,19 @@ export default function App() {
   }
 
   if (view === "cardex" && empleadoSeleccionado) {
+    const calcularTiempoLaborado = () => {
+      if (!empleadoSeleccionado.fecha_ingreso) return "";
+      const fechaIngreso = new Date(empleadoSeleccionado.fecha_ingreso);
+      const hoy = new Date();
+      let anios = hoy.getFullYear() - fechaIngreso.getFullYear();
+      let meses = hoy.getMonth() - fechaIngreso.getMonth();
+      if (meses < 0) {
+        anios--;
+        meses += 12;
+      }
+      return `${anios} año(s) y ${meses} mes(es)`;
+    };
+
     return (
       <div className="min-h-screen bg-green-50 p-6">
         <button onClick={() => setView("consulta_empleados")} className="mb-4 text-green-700 underline">← Volver</button>
@@ -166,6 +187,9 @@ export default function App() {
               />
             </div>
           )}
+          <div className="text-sm text-gray-700">
+            ⏳ Tiempo laborado: {calcularTiempoLaborado()}
+          </div>
           <label className="text-sm font-medium text-gray-700">Actualizar o agregar nueva foto</label>
           <input type="file" accept="image/*" onChange={(e) => setNuevaFoto(e.target.files[0])} />
           <input type="text" className="p-2 border rounded" value={empleadoSeleccionado.numero_empleado} onChange={(e) => setEmpleadoSeleccionado({ ...empleadoSeleccionado, numero_empleado: e.target.value })} placeholder="Número de empleado" />
