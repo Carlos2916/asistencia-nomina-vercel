@@ -8,7 +8,7 @@ export default function AltaEmpleado({ volver }) {
     apellido_paterno: "",
     apellido_materno: "",
     sexo: "",
-    sucursal: "Cabos",
+    sucursal: "",
     fecha_ingreso: "",
     sueldo_quincenal: "",
     horas_extras: "",
