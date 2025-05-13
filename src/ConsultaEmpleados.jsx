@@ -14,9 +14,9 @@ function calcularTiempoTrabajado(fechaIngreso) {
   const dias = totalDias % 30;
 
   if (años > 0) {
-    return `${años} año(s), ${meses} mes(es)`;
+    return `${años} AÑO(S), ${meses} MES(ES)`;
   } else {
-    return `${meses} mes(es), ${dias} día(s)`;
+    return `${meses} MES(ES), ${dias} DÍA(S)`;
   }
 }
 
@@ -28,19 +28,25 @@ export default function ConsultaEmpleados({
   setView,
   setEmpleadoSeleccionado
 }) {
+  // Ordenar empleados por apellido_paterno y luego aplicar filtro
+  const empleadosOrdenados = empleados
+    .slice()
+    .sort((a, b) => a.apellido_paterno.localeCompare(b.apellido_paterno))
+    .filter(filtrar);
+
   return (
     <div className="min-h-screen bg-green-50 p-6">
-      <button onClick={() => setView("dashboard")} className="mb-4 text-green-700 underline">← Volver al inicio</button>
-      <h2 className="text-2xl font-bold text-green-800 mb-4">Consulta de empleados</h2>
+      <button onClick={() => setView("dashboard")} className="mb-4 text-green-700 underline">← VOLVER AL INICIO</button>
+      <h2 className="text-2xl font-bold text-green-800 mb-4">CONSULTA DE EMPLEADOS</h2>
       <input
         type="text"
         className="p-2 mb-4 w-full max-w-md border rounded"
-        placeholder="Buscar por cualquier campo"
+        placeholder="BUSCAR POR CUALQUIER CAMPO"
         value={filtro}
         onChange={(e) => setFiltro(e.target.value)}
       />
       <div className="grid gap-4">
-        {empleados.filter(filtrar).map((emp) => (
+        {empleadosOrdenados.map((emp) => (
           <div
             key={emp.id}
             onClick={() => {
@@ -52,28 +58,28 @@ export default function ConsultaEmpleados({
             {emp.foto_url && (
               <img
                 src={emp.foto_url}
-                alt="Foto del empleado"
+                alt="FOTO DEL EMPLEADO"
                 className="w-20 h-20 object-cover rounded-full border"
               />
             )}
             <div>
               <div className="font-bold text-lg text-green-800">
-                👤 {emp.nombres} {emp.apellido_paterno} {emp.apellido_materno}
+                👤 {(emp.nombres || '').toUpperCase()} {(emp.apellido_paterno || '').toUpperCase()} {(emp.apellido_materno || '').toUpperCase()}
               </div>
               <div className="text-sm text-gray-600">
-                🧾 Número: {emp.numero_empleado} • Sexo: {emp.sexo}
+                🧾 NÚMERO: {(emp.numero_empleado || '').toString().toUpperCase()} • SEXO: {(emp.sexo || '').toUpperCase()}
               </div>
               <div className="text-sm text-gray-600">
-                🧑‍💼 Puesto: {emp.puesto} • 🏢 Sucursal: {emp.sucursal}
+                🧑‍💼 PUESTO: {(emp.puesto || '').toUpperCase()} • 🏢 SUCURSAL: {(emp.sucursal || '').toUpperCase()}
               </div>
               <div className="text-sm text-gray-600">
-                💵 Sueldo: ${emp.sueldo_quincenal} • Extras: ${emp.horas_extras}
+                💵 SUELDO: ${emp.sueldo_quincenal} • EXTRAS: ${emp.horas_extras}
               </div>
               <div className="text-sm text-gray-600">
-                📅 Ingreso: {emp.fecha_ingreso}
+                📅 INGRESO: {(emp.fecha_ingreso || '').toUpperCase()}
               </div>
               <div className="text-sm text-blue-600">
-                ⏳ Tiempo trabajado: {calcularTiempoTrabajado(emp.fecha_ingreso)}
+                ⏳ TIEMPO TRABAJADO: {calcularTiempoTrabajado(emp.fecha_ingreso)}
               </div>
             </div>
           </div>
