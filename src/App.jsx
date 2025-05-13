@@ -53,7 +53,7 @@ export default function App() {
     let foto_url = empleadoSeleccionado.foto_url;
 
     if (nuevaFoto) {
-      const nombreArchivo = `${empleadoSeleccionado.numero_empleado}.jpg`;
+      const nombreArchivo = `foto-${empleadoSeleccionado.id}.jpg`;
       const { error: uploadError } = await supabase.storage
         .from("empleadosfotos")
         .upload(nombreArchivo, nuevaFoto, { upsert: true });
