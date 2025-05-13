@@ -46,7 +46,10 @@ export default function App() {
 
   const cargarEmpleados = async () => {
     const { data, error } = await supabase.from("empleados").select("*");
-    if (!error) setEmpleados(data);
+    if (!error) {
+      const ordenados = data.sort((a, b) => a.apellido_paterno.localeCompare(b.apellido_paterno));
+      setEmpleados(ordenados);
+    }
   };
 
   const actualizarEmpleado = async () => {
@@ -84,6 +87,7 @@ export default function App() {
     });
 
     const actualizado = { ...empleadoFormateado, foto_url };
+    console.log("Actualizando con:", actualizado);
 
     const { error } = await supabase
       .from("empleados")
@@ -142,22 +146,18 @@ export default function App() {
     );
   }
 
-  if (view === "alta_empleado") {
-    return <AltaEmpleado volver={() => setView("dashboard")} />;
-  }
+  if (view === "alta_empleado") return <AltaEmpleado volver={() => setView("dashboard")} />;
 
-  if (view === "consulta_empleados") {
-    return (
-      <ConsultaEmpleados
-        empleados={empleados}
-        filtro={filtro}
-        setFiltro={setFiltro}
-        filtrar={filtrar}
-        setView={setView}
-        setEmpleadoSeleccionado={setEmpleadoSeleccionado}
-      />
-    );
-  }
+  if (view === "consulta_empleados") return (
+    <ConsultaEmpleados
+      empleados={empleados}
+      filtro={filtro}
+      setFiltro={setFiltro}
+      filtrar={filtrar}
+      setView={setView}
+      setEmpleadoSeleccionado={setEmpleadoSeleccionado}
+    />
+  );
 
   if (view === "cardex" && empleadoSeleccionado) {
     return (
@@ -167,11 +167,7 @@ export default function App() {
         <div className="grid gap-4 max-w-xl">
           {empleadoSeleccionado.foto_url && (
             <div className="mb-4">
-              <img
-                src={empleadoSeleccionado.foto_url}
-                alt="Foto del empleado"
-                className="w-32 h-32 object-cover rounded-full border"
-              />
+              <img src={empleadoSeleccionado.foto_url} alt="Foto del empleado" className="w-32 h-32 object-cover rounded-full border" />
             </div>
           )}
           <label className="text-sm font-medium text-gray-700">Actualizar o agregar nueva foto</label>
@@ -194,27 +190,6 @@ export default function App() {
           </select>
           <button onClick={actualizarEmpleado} className="bg-green-700 text-white p-2 rounded hover:bg-green-800">Guardar cambios</button>
           <button onClick={eliminarEmpleado} className="bg-red-600 text-white p-2 rounded hover:bg-red-700">Eliminar empleado</button>
-        </div>
-      </div>
-    );
-  }
-
-  if (view === "dashboard") {
-    return (
-      <div className="min-h-screen bg-green-50 p-6">
-        <div className="flex justify-between mb-6">
-          <h1 className="text-xl font-bold text-green-700">Bienvenido, {user.email}</h1>
-          <button onClick={handleLogout} className="bg-red-500 text-white px-4 py-2 rounded">Cerrar sesión</button>
-        </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div onClick={() => setView("alta_empleado")} className="bg-white p-4 rounded-xl shadow hover:shadow-md cursor-pointer">
-            <h2 className="text-lg font-semibold text-green-800">📋 Alta de empleados</h2>
-            <p className="text-sm text-gray-600">Registra nuevos empleados al sistema.</p>
-          </div>
-          <div onClick={() => { cargarEmpleados(); setView("consulta_empleados"); }} className="bg-white p-4 rounded-xl shadow hover:shadow-md cursor-pointer">
-            <h2 className="text-lg font-semibold text-green-800">🔍 Consultar empleados</h2>
-            <p className="text-sm text-gray-600">Consulta y administra el personal registrado.</p>
-          </div>
         </div>
       </div>
     );
