@@ -1,10 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { createClient } from '@supabase/supabase-js';
-
-const supabase = createClient(
-  import.meta.env.VITE_SUPABASE_URL,
-  import.meta.env.VITE_SUPABASE_ANON_KEY
-);
+import React, { useState } from 'react';
+import supabase from './supabaseClient';
 
 export default function AltaEmpleado({ volver }) {
   const [empleado, setEmpleado] = useState({
@@ -49,7 +44,7 @@ export default function AltaEmpleado({ volver }) {
       return alert("Por favor selecciona una foto");
     }
 
-    const nombreArchivo = `${empleado.numero_empleado}.jpg`;
+    const nombreArchivo = `foto-${empleado.numero_empleado}.jpg`;
     const { error: uploadError } = await supabase.storage
       .from("empleadosfotos")
       .upload(nombreArchivo, empleadoFoto, { upsert: true });
@@ -92,24 +87,6 @@ export default function AltaEmpleado({ volver }) {
     }
   };
 
-  function calcularTiempoLaborado(fechaIngreso) {
-    const hoy = new Date();
-    const ingreso = new Date(fechaIngreso);
-    const diffAnios = hoy.getFullYear() - ingreso.getFullYear();
-    const diffMeses = hoy.getMonth() - ingreso.getMonth();
-    const diffDias = hoy.getDate() - ingreso.getDate();
-
-    let anios = diffAnios;
-    let meses = diffMeses;
-
-    if (diffMeses < 0 || (diffMeses === 0 && diffDias < 0)) {
-      anios--;
-      meses = (diffMeses + 12) % 12;
-    }
-
-    return `${anios} años y ${meses} meses`;
-  }
-
   return (
     <div className="min-h-screen bg-green-50 p-6">
       <button onClick={volver} className="mb-4 text-green-700 underline">← Volver al inicio</button>
@@ -131,9 +108,6 @@ export default function AltaEmpleado({ volver }) {
         </select>
 
         <input type="date" className="p-2 border rounded" value={empleado.fecha_ingreso} onChange={(e) => setEmpleado({ ...empleado, fecha_ingreso: e.target.value })} />
-        <div className="text-sm text-gray-700">
-          Tiempo laborado: {empleado.fecha_ingreso ? calcularTiempoLaborado(empleado.fecha_ingreso) : ""}
-        </div>
         <input type="number" placeholder="Sueldo quincenal" className="p-2 border rounded" value={empleado.sueldo_quincenal} onChange={(e) => setEmpleado({ ...empleado, sueldo_quincenal: e.target.value })} />
         <input type="number" placeholder="Horas extras" className="p-2 border rounded" value={empleado.horas_extras} onChange={(e) => setEmpleado({ ...empleado, horas_extras: e.target.value })} />
 

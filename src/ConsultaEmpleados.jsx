@@ -79,7 +79,7 @@ export default function ConsultaEmpleados({
                 📅 INGRESO: {(emp.fecha_ingreso || '').toUpperCase()}
               </div>
               <div className="text-sm text-blue-600">
-                ⏳ TIEMPO TRABAJADO: {calcularTiempoTrabajado(emp.fecha_ingreso)}
+                ⏳ TIEMPO TRABAJADO: {emp.fecha_ingreso ? calcularTiempoTrabajado(emp.fecha_ingreso) : 'SIN FECHA'}
               </div>
             </div>
           </div>

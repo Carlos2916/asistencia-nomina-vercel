@@ -1,12 +1,7 @@
 import React, { useEffect, useState } from 'react';
-import { createClient } from '@supabase/supabase-js';
+import supabase from './supabaseClient';
 import AltaEmpleado from './AltaEmpleado';
 import ConsultaEmpleados from './ConsultaEmpleados';
-
-const supabase = createClient(
-  import.meta.env.VITE_SUPABASE_URL,
-  import.meta.env.VITE_SUPABASE_ANON_KEY
-);
 
 export default function App() {
   const [user, setUser] = useState(null);
@@ -87,7 +82,6 @@ export default function App() {
     });
 
     const actualizado = { ...empleadoFormateado, foto_url };
-    console.log("Actualizando con:", actualizado);
 
     const { error } = await supabase
       .from("empleados")
@@ -112,7 +106,6 @@ export default function App() {
       .eq("id", empleadoSeleccionado.id);
     if (error) {
       alert("Error al eliminar empleado");
-      console.log(error);
     } else {
       alert("Empleado eliminado correctamente");
       setEmpleadoSeleccionado(null);
