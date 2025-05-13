@@ -141,36 +141,40 @@ export default function App() {
     );
   }
 
-  if (view === "dashboard") {
-    return (
-      <div className="min-h-screen bg-green-50 p-6">
-        <h2 className="text-2xl font-bold text-green-800 mb-4">Bienvenido al panel</h2>
-        <div className="grid gap-4">
-          <button
-            onClick={() => setView("alta_empleado")}
-            className="bg-white border p-4 rounded shadow hover:bg-green-100"
-          >
-            Alta de empleado
-          </button>
-          <button
-            onClick={() => {
-              cargarEmpleados();
-              setView("consulta_empleados");
-            }}
-            className="bg-white border p-4 rounded shadow hover:bg-green-100"
-          >
-            Consultar empleados
-          </button>
-          <button
-            onClick={handleLogout}
-            className="bg-red-600 text-white p-2 rounded hover:bg-red-700"
-          >
-            Cerrar sesión
-          </button>
-        </div>
+ if (view === "dashboard") {
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-green-100 to-green-300 flex flex-col items-center justify-center px-4 py-10">
+      <div className="bg-white shadow-lg rounded-2xl p-6 max-w-md w-full space-y-6">
+        <h1 className="text-2xl font-bold text-green-700 text-center">Panel de Administración</h1>
+
+        <button
+          onClick={() => setView("alta_empleado")}
+          className="w-full bg-green-600 hover:bg-green-700 text-white py-2 px-4 rounded-lg text-lg shadow transition duration-200"
+        >
+          📋 Alta de empleado
+        </button>
+
+        <button
+          onClick={() => {
+            cargarEmpleados();
+            setView("consulta_empleados");
+          }}
+          className="w-full bg-green-600 hover:bg-green-700 text-white py-2 px-4 rounded-lg text-lg shadow transition duration-200"
+        >
+          🔍 Consultar empleados
+        </button>
+
+        <button
+          onClick={handleLogout}
+          className="w-full bg-red-600 hover:bg-red-700 text-white py-2 px-4 rounded-lg text-lg shadow transition duration-200"
+        >
+          🚪 Cerrar sesión
+        </button>
       </div>
-    );
-  }
+    </div>
+  );
+}
+
 
   if (view === "alta_empleado") return <AltaEmpleado volver={() => setView("dashboard")} />;
 
