@@ -19,7 +19,7 @@ export default function App() {
       if (data.user) {
         setUser(data.user);
         setView("dashboard");
-        cargarEmpleados(); // ✅ se agrega al iniciar sesión
+        cargarEmpleados();
       }
     });
   }, []);
@@ -32,7 +32,7 @@ export default function App() {
     if (error) return alert("Error al iniciar sesión");
     setUser(data.user);
     setView("dashboard");
-    await cargarEmpleados(); // ✅ se carga la lista de empleados
+    await cargarEmpleados();
   };
 
   const handleLogout = async () => {
@@ -141,6 +141,37 @@ export default function App() {
     );
   }
 
+  if (view === "dashboard") {
+    return (
+      <div className="min-h-screen bg-green-50 p-6">
+        <h2 className="text-2xl font-bold text-green-800 mb-4">Bienvenido al panel</h2>
+        <div className="grid gap-4">
+          <button
+            onClick={() => setView("alta_empleado")}
+            className="bg-white border p-4 rounded shadow hover:bg-green-100"
+          >
+            Alta de empleado
+          </button>
+          <button
+            onClick={() => {
+              cargarEmpleados();
+              setView("consulta_empleados");
+            }}
+            className="bg-white border p-4 rounded shadow hover:bg-green-100"
+          >
+            Consultar empleados
+          </button>
+          <button
+            onClick={handleLogout}
+            className="bg-red-600 text-white p-2 rounded hover:bg-red-700"
+          >
+            Cerrar sesión
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   if (view === "alta_empleado") return <AltaEmpleado volver={() => setView("dashboard")} />;
 
   if (view === "consulta_empleados") return (
@@ -190,7 +221,6 @@ export default function App() {
     );
   }
 
-  // 🔁 Fallback si la vista no coincide (pantalla blanca protección)
   return (
     <div className="min-h-screen flex items-center justify-center text-red-600">
       ⚠️ Vista no válida. Verifica el estado de la aplicación.
