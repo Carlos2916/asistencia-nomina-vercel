@@ -19,6 +19,7 @@ export default function App() {
       if (data.user) {
         setUser(data.user);
         setView("dashboard");
+        cargarEmpleados(); // ✅ se agrega al iniciar sesión
       }
     });
   }, []);
@@ -31,6 +32,7 @@ export default function App() {
     if (error) return alert("Error al iniciar sesión");
     setUser(data.user);
     setView("dashboard");
+    await cargarEmpleados(); // ✅ se carga la lista de empleados
   };
 
   const handleLogout = async () => {
@@ -188,5 +190,10 @@ export default function App() {
     );
   }
 
-  return null;
+  // 🔁 Fallback si la vista no coincide (pantalla blanca protección)
+  return (
+    <div className="min-h-screen flex items-center justify-center text-red-600">
+      ⚠️ Vista no válida. Verifica el estado de la aplicación.
+    </div>
+  );
 }
