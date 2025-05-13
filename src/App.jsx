@@ -12,7 +12,7 @@ export default function App() {
   const [empleadoSeleccionado, setEmpleadoSeleccionado] = useState(null);
   const [nuevaFoto, setNuevaFoto] = useState(null);
 
-  const sucursales = ["Cabos", "Costa", "Bonfil", "Puerto", "Cedis", "Administrativo"];
+  const sucursales = ["Cabos", "Costa", "Bonfil", "Puerto", "Cedis", "Cedis Adm", "Chichen"];
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => {

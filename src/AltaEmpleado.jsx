@@ -17,8 +17,8 @@ export default function AltaEmpleado({ volver }) {
 
   const [empleadoFoto, setEmpleadoFoto] = useState(null);
 
-  const sucursales = ["Cabos", "Costa", "Bonfil", "Puerto", "Cedis", "Cedis Adm"];
-  const puestos = ["Gerente", "Supervisor", "Vendedor", "Chofer", "Almacenista", "Administrativo"];
+  const sucursales = ["Cabos", "Costa", "Bonfil", "Puerto", "Cedis", "Cedis Adm", "Chichen"];
+  const puestos = ["Gerente", "Supervisor", "Vendedor", "Chofer", "Almacenista", "Administrativo", "Auxiliar", "Contador", "Programador", "Encargado"];
 
   const handleAltaEmpleado = async () => {
     const camposObligatorios = [
