@@ -12,9 +12,9 @@ export default function App() {
   const [empleadoSeleccionado, setEmpleadoSeleccionado] = useState(null);
   const [nuevaFoto, setNuevaFoto] = useState(null);
 
-  const sucursales = ["Cabos", "Costa", "Bonfil", "Puerto", "Cedis", "Administrativo", "Cedis Adm", "Chichen"];
+  const sucursales = ["Cabos", "Costa", "Bonfil", "Puerto", "Cedis", "Cedis Adm", "Chichen"];
   const puestos = ["Gerente", "Supervisor", "Vendedor", "Chofer", "Almacenista", "Administrativo", "Auxiliar", "Contador", "Programador", "Encargado", "Aux Sistemas", "Arquitecto", "Aux Contable"];
-  const horasExtras = ["60", "70", "80", "100"];
+  const horasExtrasOptions = ["60", "70", "80", "100"];
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => {
@@ -143,85 +143,84 @@ export default function App() {
     );
   }
 
+  if (view === "dashboard") {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-green-100 to-green-300 flex flex-col items-center justify-center px-4 py-10">
+        <div className="bg-white shadow-lg rounded-2xl p-6 max-w-md w-full space-y-6">
+          <h1 className="text-2xl font-bold text-green-700 text-center">Panel de Administración</h1>
+
+          <button onClick={() => setView("alta_empleado")} className="w-full bg-green-600 hover:bg-green-700 text-white py-2 px-4 rounded-lg text-lg shadow transition duration-200">
+            📋 Alta de empleado
+          </button>
+
+          <button onClick={() => { cargarEmpleados(); setView("consulta_empleados"); }} className="w-full bg-green-600 hover:bg-green-700 text-white py-2 px-4 rounded-lg text-lg shadow transition duration-200">
+            🔍 Consultar empleados
+          </button>
+
+          <button onClick={handleLogout} className="w-full bg-red-600 hover:bg-red-700 text-white py-2 px-4 rounded-lg text-lg shadow transition duration-200">
+            🚪 Cerrar sesión
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   if (view === "alta_empleado") return <AltaEmpleado volver={() => setView("dashboard")} />;
 
   if (view === "consulta_empleados") return (
-    <ConsultaEmpleados
-      empleados={empleados}
-      filtro={filtro}
-      setFiltro={setFiltro}
-      filtrar={filtrar}
-      setView={setView}
-      setEmpleadoSeleccionado={setEmpleadoSeleccionado}
-    />
+    <ConsultaEmpleados empleados={empleados} filtro={filtro} setFiltro={setFiltro} filtrar={filtrar} setView={setView} setEmpleadoSeleccionado={setEmpleadoSeleccionado} />
   );
 
- if (view === "cardex" && empleadoSeleccionado) {
-  const puestos = ["Gerente", "Supervisor", "Vendedor", "Chofer", "Almacenista", "Administrativo", "Auxiliar", "Contador", "Programador", "Encargado", "Aux Sistemas", "Arquitecto", "Aux Contable"];
-  const horasExtrasOpciones = ["60", "70", "80", "100"];
+  if (view === "cardex" && empleadoSeleccionado) {
+    return (
+      <div className="min-h-screen bg-green-50 p-6">
+        <button onClick={() => setView("consulta_empleados")} className="mb-4 text-green-700 underline">← Volver</button>
+        <h2 className="text-2xl font-bold text-green-800 mb-4">Editar Empleado</h2>
+        <div className="grid gap-4 max-w-xl">
+          {empleadoSeleccionado.foto_url && (
+            <div className="mb-4">
+              <img src={empleadoSeleccionado.foto_url} alt="Foto del empleado" className="w-32 h-32 object-cover rounded-full border" />
+            </div>
+          )}
+          <label className="text-sm font-medium text-gray-700">Actualizar o agregar nueva foto</label>
+          <input type="file" accept="image/*" onChange={(e) => setNuevaFoto(e.target.files[0])} />
+          <input type="text" className="p-2 border rounded" value={empleadoSeleccionado.numero_empleado} onChange={(e) => setEmpleadoSeleccionado({ ...empleadoSeleccionado, numero_empleado: e.target.value })} placeholder="Número de empleado" />
+          <input type="text" className="p-2 border rounded" value={empleadoSeleccionado.nombres} onChange={(e) => setEmpleadoSeleccionado({ ...empleadoSeleccionado, nombres: e.target.value })} placeholder="Nombre(s)" />
+          <input type="text" className="p-2 border rounded" value={empleadoSeleccionado.apellido_paterno} onChange={(e) => setEmpleadoSeleccionado({ ...empleadoSeleccionado, apellido_paterno: e.target.value })} placeholder="Apellido paterno" />
+          <input type="text" className="p-2 border rounded" value={empleadoSeleccionado.apellido_materno} onChange={(e) => setEmpleadoSeleccionado({ ...empleadoSeleccionado, apellido_materno: e.target.value })} placeholder="Apellido materno" />
 
-  const validarEmpleado = () => {
-    if (!empleadoSeleccionado.sucursal) return alert("Selecciona una sucursal");
-    if (!empleadoSeleccionado.puesto) return alert("Selecciona un puesto");
-    if (!empleadoSeleccionado.horas_extras) return alert("Selecciona horas extras");
-    return true;
-  };
+          <select className="p-2 border rounded" value={empleadoSeleccionado.sucursal} onChange={(e) => setEmpleadoSeleccionado({ ...empleadoSeleccionado, sucursal: e.target.value })}>
+            <option value="">Selecciona sucursal</option>
+            {sucursales.map((suc) => <option key={suc} value={suc}>{suc}</option>)}
+          </select>
+
+          <input type="date" className="p-2 border rounded" value={empleadoSeleccionado.fecha_ingreso} onChange={(e) => setEmpleadoSeleccionado({ ...empleadoSeleccionado, fecha_ingreso: e.target.value })} />
+          <select className="p-2 border rounded" value={empleadoSeleccionado.horas_extras} onChange={(e) => setEmpleadoSeleccionado({ ...empleadoSeleccionado, horas_extras: e.target.value })}>
+            <option value="">Selecciona horas extras</option>
+            {horasExtrasOptions.map((hx) => <option key={hx} value={hx}>{hx}</option>)}
+          </select>
+
+          <select className="p-2 border rounded" value={empleadoSeleccionado.puesto} onChange={(e) => setEmpleadoSeleccionado({ ...empleadoSeleccionado, puesto: e.target.value })}>
+            <option value="">Selecciona puesto</option>
+            {puestos.map((p) => <option key={p} value={p}>{p}</option>)}
+          </select>
+
+          <select className="p-2 border rounded" value={empleadoSeleccionado.sexo || ""} onChange={(e) => setEmpleadoSeleccionado({ ...empleadoSeleccionado, sexo: e.target.value })}>
+            <option value="">Selecciona sexo</option>
+            <option value="MASCULINO">MASCULINO</option>
+            <option value="FEMENINO">FEMENINO</option>
+          </select>
+
+          <button onClick={actualizarEmpleado} className="bg-green-700 text-white p-2 rounded hover:bg-green-800">Guardar cambios</button>
+          <button onClick={eliminarEmpleado} className="bg-red-600 text-white p-2 rounded hover:bg-red-700">Eliminar empleado</button>
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <div className="min-h-screen bg-green-50 p-6">
-      <button onClick={() => setView("consulta_empleados")} className="mb-4 text-green-700 underline">← Volver</button>
-      <h2 className="text-2xl font-bold text-green-800 mb-4">Editar Empleado</h2>
-      <div className="grid gap-4 max-w-xl">
-        {empleadoSeleccionado.foto_url && (
-          <div className="mb-4">
-            <img src={empleadoSeleccionado.foto_url} alt="Foto del empleado" className="w-32 h-32 object-cover rounded-full border" />
-          </div>
-        )}
-        <label className="text-sm font-medium text-gray-700">Actualizar o agregar nueva foto</label>
-        <input type="file" accept="image/*" onChange={(e) => setNuevaFoto(e.target.files[0])} />
-        <input type="text" className="p-2 border rounded" value={empleadoSeleccionado.numero_empleado} onChange={(e) => setEmpleadoSeleccionado({ ...empleadoSeleccionado, numero_empleado: e.target.value })} placeholder="Número de empleado" />
-        <input type="text" className="p-2 border rounded" value={empleadoSeleccionado.nombres} onChange={(e) => setEmpleadoSeleccionado({ ...empleadoSeleccionado, nombres: e.target.value })} placeholder="Nombre(s)" />
-        <input type="text" className="p-2 border rounded" value={empleadoSeleccionado.apellido_paterno} onChange={(e) => setEmpleadoSeleccionado({ ...empleadoSeleccionado, apellido_paterno: e.target.value })} placeholder="Apellido paterno" />
-        <input type="text" className="p-2 border rounded" value={empleadoSeleccionado.apellido_materno} onChange={(e) => setEmpleadoSeleccionado({ ...empleadoSeleccionado, apellido_materno: e.target.value })} placeholder="Apellido materno" />
-
-        <select className="p-2 border rounded" value={empleadoSeleccionado.sexo || ""} onChange={(e) => setEmpleadoSeleccionado({ ...empleadoSeleccionado, sexo: e.target.value })}>
-          <option value="">Selecciona sexo</option>
-          <option value="MASCULINO">MASCULINO</option>
-          <option value="FEMENINO">FEMENINO</option>
-        </select>
-
-        <select className="p-2 border rounded" value={empleadoSeleccionado.sucursal} onChange={(e) => setEmpleadoSeleccionado({ ...empleadoSeleccionado, sucursal: e.target.value })}>
-          <option value="">Selecciona sucursal</option>
-          {sucursales.map((suc) => <option key={suc} value={suc}>{suc}</option>)}
-        </select>
-
-        <input type="date" className="p-2 border rounded" value={empleadoSeleccionado.fecha_ingreso} onChange={(e) => setEmpleadoSeleccionado({ ...empleadoSeleccionado, fecha_ingreso: e.target.value })} />
-        <input type="number" className="p-2 border rounded" value={empleadoSeleccionado.sueldo_quincenal} onChange={(e) => setEmpleadoSeleccionado({ ...empleadoSeleccionado, sueldo_quincenal: e.target.value })} placeholder="Sueldo quincenal" />
-
-        <select className="p-2 border rounded" value={empleadoSeleccionado.horas_extras} onChange={(e) => setEmpleadoSeleccionado({ ...empleadoSeleccionado, horas_extras: e.target.value })}>
-          <option value="">Selecciona horas extras</option>
-          {horasExtrasOpciones.map((hx) => <option key={hx} value={hx}>{hx}</option>)}
-        </select>
-
-        <select className="p-2 border rounded" value={empleadoSeleccionado.puesto} onChange={(e) => setEmpleadoSeleccionado({ ...empleadoSeleccionado, puesto: e.target.value })}>
-          <option value="">Selecciona puesto</option>
-          {puestos.map((p) => <option key={p} value={p}>{p}</option>)}
-        </select>
-
-        <button
-          onClick={() => {
-            if (validarEmpleado()) actualizarEmpleado();
-          }}
-          className="bg-green-700 text-white p-2 rounded hover:bg-green-800"
-        >
-          Guardar cambios
-        </button>
-        <button onClick={eliminarEmpleado} className="bg-red-600 text-white p-2 rounded hover:bg-red-700">Eliminar empleado</button>
-      </div>
+    <div className="min-h-screen flex items-center justify-center text-red-600">
+      ⚠️ Vista no válida. Verifica el estado de la aplicación.
     </div>
   );
-}
-
-
-  return null;
 }
