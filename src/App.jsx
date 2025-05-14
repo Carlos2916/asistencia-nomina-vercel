@@ -2,6 +2,8 @@ import React, { useEffect, useState } from 'react';
 import supabase from './supabaseClient';
 import AltaEmpleado from './AltaEmpleado';
 import ConsultaEmpleados from './ConsultaEmpleados';
+import AsignarAdministrador from './AsignarAdministrador';
+import ListaAdministradores from './ListaAdministradores';
 
 export default function App() {
   const [user, setUser] = useState(null);
@@ -17,13 +19,27 @@ export default function App() {
   const horasExtrasOptions = ["60", "70", "80", "100"];
 
   useEffect(() => {
-    supabase.auth.getUser().then(({ data }) => {
-      if (data.user) {
-        setUser(data.user);
-        setView("dashboard");
-        cargarEmpleados();
+    const fetchUsuario = async () => {
+      const { data: authData } = await supabase.auth.getUser();
+
+      if (authData.user) {
+        const { data: usuarioData, error } = await supabase
+          .from("usuarios")
+          .select("*")
+          .eq("email", authData.user.email)
+          .single();
+
+        if (usuarioData) {
+          setUser(usuarioData);
+          setView("dashboard");
+          cargarEmpleados(usuarioData);
+        } else {
+          console.error("No se encontró el usuario en la tabla usuarios", error);
+        }
       }
-    });
+    };
+
+    fetchUsuario();
   }, []);
 
   const handleLogin = async () => {
@@ -32,9 +48,18 @@ export default function App() {
       password: form.password,
     });
     if (error) return alert("Error al iniciar sesión");
-    setUser(data.user);
+
+    const { data: usuarioData, error: fetchError } = await supabase
+      .from("usuarios")
+      .select("*")
+      .eq("email", form.email)
+      .single();
+
+    if (fetchError || !usuarioData) return alert("No se encontró el usuario");
+
+    setUser(usuarioData);
     setView("dashboard");
-    await cargarEmpleados();
+    await cargarEmpleados(usuarioData);
   };
 
   const handleLogout = async () => {
@@ -43,8 +68,15 @@ export default function App() {
     setView("login");
   };
 
-  const cargarEmpleados = async () => {
-    const { data, error } = await supabase.from("empleados").select("*");
+  const cargarEmpleados = async (usuario) => {
+    let query = supabase.from("empleados").select("*");
+
+    if (usuario?.rol === "administrador") {
+      query = query.or(`creado_por.eq.${usuario.id},sucursal.eq.${usuario.sucursal}`);
+    }
+
+    const { data, error } = await query;
+
     if (!error) {
       const ordenados = data.sort((a, b) => a.apellido_paterno.localeCompare(b.apellido_paterno));
       setEmpleados(ordenados);
@@ -97,7 +129,7 @@ export default function App() {
     } else {
       alert("Empleado actualizado");
       setEmpleadoSeleccionado(null);
-      cargarEmpleados();
+      cargarEmpleados(user);
       setView("consulta_empleados");
     }
   };
@@ -113,7 +145,7 @@ export default function App() {
     } else {
       alert("Empleado eliminado correctamente");
       setEmpleadoSeleccionado(null);
-      cargarEmpleados();
+      cargarEmpleados(user);
       setView("consulta_empleados");
     }
   };
@@ -153,9 +185,20 @@ export default function App() {
             📋 Alta de empleado
           </button>
 
-          <button onClick={() => { cargarEmpleados(); setView("consulta_empleados"); }} className="w-full bg-green-600 hover:bg-green-700 text-white py-2 px-4 rounded-lg text-lg shadow transition duration-200">
+          <button onClick={() => { cargarEmpleados(user); setView("consulta_empleados"); }} className="w-full bg-green-600 hover:bg-green-700 text-white py-2 px-4 rounded-lg text-lg shadow transition duration-200">
             🔍 Consultar empleados
           </button>
+
+          {user?.rol === 'superusuario' && (
+            <>
+              <button onClick={() => setView("asignar_administrador")} className="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-lg text-lg shadow transition duration-200">
+                🛠 Asignar administrador
+              </button>
+              <button onClick={() => setView("lista_administradores")} className="w-full bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded-lg text-lg shadow transition duration-200">
+                📋 Ver administradores
+              </button>
+            </>
+          )}
 
           <button onClick={handleLogout} className="w-full bg-red-600 hover:bg-red-700 text-white py-2 px-4 rounded-lg text-lg shadow transition duration-200">
             🚪 Cerrar sesión
@@ -165,58 +208,15 @@ export default function App() {
     );
   }
 
-  if (view === "alta_empleado") return <AltaEmpleado volver={() => setView("dashboard")} />;
+  if (view === "alta_empleado") return <AltaEmpleado volver={() => setView("dashboard")} usuario={user} />;
 
   if (view === "consulta_empleados") return (
-    <ConsultaEmpleados empleados={empleados} filtro={filtro} setFiltro={setFiltro} filtrar={filtrar} setView={setView} setEmpleadoSeleccionado={setEmpleadoSeleccionado} />
+    <ConsultaEmpleados empleados={empleados} filtro={filtro} setFiltro={setFiltro} filtrar={filtrar} setView={setView} setEmpleadoSeleccionado={setEmpleadoSeleccionado} usuario={user} />
   );
 
-  if (view === "cardex" && empleadoSeleccionado) {
-    return (
-      <div className="min-h-screen bg-green-50 p-6">
-        <button onClick={() => setView("consulta_empleados")} className="mb-4 text-green-700 underline">← Volver</button>
-        <h2 className="text-2xl font-bold text-green-800 mb-4">Editar Empleado</h2>
-        <div className="grid gap-4 max-w-xl">
-          {empleadoSeleccionado.foto_url && (
-            <div className="mb-4">
-              <img src={empleadoSeleccionado.foto_url} alt="Foto del empleado" className="w-32 h-32 object-cover rounded-full border" />
-            </div>
-          )}
-          <label className="text-sm font-medium text-gray-700">Actualizar o agregar nueva foto</label>
-          <input type="file" accept="image/*" onChange={(e) => setNuevaFoto(e.target.files[0])} />
-          <input type="text" className="p-2 border rounded" value={empleadoSeleccionado.numero_empleado} onChange={(e) => setEmpleadoSeleccionado({ ...empleadoSeleccionado, numero_empleado: e.target.value })} placeholder="Número de empleado" />
-          <input type="text" className="p-2 border rounded" value={empleadoSeleccionado.nombres} onChange={(e) => setEmpleadoSeleccionado({ ...empleadoSeleccionado, nombres: e.target.value })} placeholder="Nombre(s)" />
-          <input type="text" className="p-2 border rounded" value={empleadoSeleccionado.apellido_paterno} onChange={(e) => setEmpleadoSeleccionado({ ...empleadoSeleccionado, apellido_paterno: e.target.value })} placeholder="Apellido paterno" />
-          <input type="text" className="p-2 border rounded" value={empleadoSeleccionado.apellido_materno} onChange={(e) => setEmpleadoSeleccionado({ ...empleadoSeleccionado, apellido_materno: e.target.value })} placeholder="Apellido materno" />
+  if (view === "asignar_administrador") return <AsignarAdministrador volver={() => setView("dashboard")} />;
 
-          <select className="p-2 border rounded" value={empleadoSeleccionado.sucursal} onChange={(e) => setEmpleadoSeleccionado({ ...empleadoSeleccionado, sucursal: e.target.value })}>
-            <option value="">Selecciona sucursal</option>
-            {sucursales.map((suc) => <option key={suc} value={suc}>{suc}</option>)}
-          </select>
-
-          <input type="date" className="p-2 border rounded" value={empleadoSeleccionado.fecha_ingreso} onChange={(e) => setEmpleadoSeleccionado({ ...empleadoSeleccionado, fecha_ingreso: e.target.value })} />
-          <select className="p-2 border rounded" value={empleadoSeleccionado.horas_extras} onChange={(e) => setEmpleadoSeleccionado({ ...empleadoSeleccionado, horas_extras: e.target.value })}>
-            <option value="">Selecciona horas extras</option>
-            {horasExtrasOptions.map((hx) => <option key={hx} value={hx}>{hx}</option>)}
-          </select>
-
-          <select className="p-2 border rounded" value={empleadoSeleccionado.puesto} onChange={(e) => setEmpleadoSeleccionado({ ...empleadoSeleccionado, puesto: e.target.value })}>
-            <option value="">Selecciona puesto</option>
-            {puestos.map((p) => <option key={p} value={p}>{p}</option>)}
-          </select>
-
-          <select className="p-2 border rounded" value={empleadoSeleccionado.sexo || ""} onChange={(e) => setEmpleadoSeleccionado({ ...empleadoSeleccionado, sexo: e.target.value })}>
-            <option value="">Selecciona sexo</option>
-            <option value="MASCULINO">MASCULINO</option>
-            <option value="FEMENINO">FEMENINO</option>
-          </select>
-
-          <button onClick={actualizarEmpleado} className="bg-green-700 text-white p-2 rounded hover:bg-green-800">Guardar cambios</button>
-          <button onClick={eliminarEmpleado} className="bg-red-600 text-white p-2 rounded hover:bg-red-700">Eliminar empleado</button>
-        </div>
-      </div>
-    );
-  }
+  if (view === "lista_administradores") return <ListaAdministradores volver={() => setView("dashboard")} />;
 
   return (
     <div className="min-h-screen flex items-center justify-center text-red-600">

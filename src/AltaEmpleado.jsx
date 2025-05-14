@@ -1,14 +1,14 @@
 import React, { useState } from 'react';
 import supabase from './supabaseClient';
 
-export default function AltaEmpleado({ volver }) {
+export default function AltaEmpleado({ volver, usuario }) {
   const [empleado, setEmpleado] = useState({
     numero_empleado: "",
     nombres: "",
     apellido_paterno: "",
     apellido_materno: "",
     sexo: "",
-    sucursal: "",
+    sucursal: usuario?.sucursal || "",
     fecha_ingreso: "",
     sueldo_quincenal: "",
     horas_extras: "",
@@ -68,6 +68,7 @@ export default function AltaEmpleado({ volver }) {
     const nuevoEmpleado = {
       ...empleadoFormateado,
       foto_url: data.signedUrl,
+      creado_por: usuario?.id || null,
     };
 
     const { error } = await supabase.from("empleados").insert([nuevoEmpleado]);

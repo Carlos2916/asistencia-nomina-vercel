@@ -26,13 +26,17 @@ export default function ConsultaEmpleados({
   setFiltro,
   filtrar,
   setView,
-  setEmpleadoSeleccionado
+  setEmpleadoSeleccionado,
+  usuario
 }) {
-  // Ordenar empleados por apellido_paterno y luego aplicar filtro
-  const empleadosOrdenados = empleados
-    .slice()
-    .sort((a, b) => a.apellido_paterno.localeCompare(b.apellido_paterno))
-    .filter(filtrar);
+  // Filtrado según rol del usuario
+  const empleadosFiltrados = empleados
+    .filter(emp => {
+      if (usuario.rol === 'superusuario') return true;
+      return emp.creado_por === usuario.id || emp.sucursal === usuario.sucursal;
+    })
+    .filter(filtrar)
+    .sort((a, b) => a.apellido_paterno.localeCompare(b.apellido_paterno));
 
   return (
     <div className="min-h-screen bg-green-50 p-6">
@@ -46,7 +50,7 @@ export default function ConsultaEmpleados({
         onChange={(e) => setFiltro(e.target.value)}
       />
       <div className="grid gap-4">
-        {empleadosOrdenados.map((emp) => (
+        {empleadosFiltrados.map((emp) => (
           <div
             key={emp.id}
             onClick={() => {
