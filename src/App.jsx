@@ -4,6 +4,8 @@ import AltaEmpleado from './AltaEmpleado';
 import ConsultaEmpleados from './ConsultaEmpleados';
 import AsignarAdministrador from './AsignarAdministrador';
 import ListaAdministradores from './ListaAdministradores';
+import ConvertirImportados from './ConvertirImportados';
+import ListaUsuarios from './ListaUsuarios';
 
 export default function App() {
   const [user, setUser] = useState(null);
@@ -197,6 +199,12 @@ export default function App() {
               <button onClick={() => setView("lista_administradores")} className="w-full bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded-lg text-lg shadow transition duration-200">
                 📋 Ver administradores
               </button>
+              <button onClick={() => setView("convertir_importados")} className="w-full bg-purple-600 hover:bg-purple-700 text-white py-2 px-4 rounded-lg text-lg shadow transition duration-200">
+                🔄 Convertir empleados importados
+              </button>
+              <button onClick={() => setView("lista_usuarios")} className="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-2 px-4 rounded-lg text-lg shadow transition duration-200">
+                👥 Ver usuarios del sistema
+              </button>
             </>
           )}
 
@@ -217,6 +225,10 @@ export default function App() {
   if (view === "asignar_administrador") return <AsignarAdministrador volver={() => setView("dashboard")} />;
 
   if (view === "lista_administradores") return <ListaAdministradores volver={() => setView("dashboard")} />;
+
+  if (view === "convertir_importados") return <ConvertirImportados volver={() => setView("dashboard")} usuario={user} />;
+
+  if (view === "lista_usuarios") return <ListaUsuarios volver={() => setView("dashboard")} />;
 
   return (
     <div className="min-h-screen flex items-center justify-center text-red-600">

@@ -1,124 +1,159 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import supabase from './supabaseClient';
+import AltaEmpleado from './AltaEmpleado';
+import ConsultaEmpleados from './ConsultaEmpleados';
+import AsignarAdministrador from './AsignarAdministrador';
+import ConvertirImportados from './ConvertirImportados';
 
-export default function AltaEmpleado({ volver, usuario }) {
-  const [empleado, setEmpleado] = useState({
-    numero_empleado: "",
-    nombres: "",
-    apellido_paterno: "",
-    apellido_materno: "",
-    sexo: "",
-    sucursal: usuario?.sucursal || "",
-    fecha_ingreso: "",
-    sueldo_quincenal: "",
-    horas_extras: "",
-    puesto: "",
-  });
-
-  const [empleadoFoto, setEmpleadoFoto] = useState(null);
+export default function App() {
+  const [user, setUser] = useState(null);
+  const [view, setView] = useState("login");
+  const [form, setForm] = useState({ email: "", password: "" });
+  const [empleados, setEmpleados] = useState([]);
+  const [filtro, setFiltro] = useState("");
+  const [empleadoSeleccionado, setEmpleadoSeleccionado] = useState(null);
+  const [nuevaFoto, setNuevaFoto] = useState(null);
 
   const sucursales = ["Cabos", "Costa", "Bonfil", "Puerto", "Cedis", "Cedis Adm", "Chichen"];
   const puestos = ["Gerente", "Supervisor", "Vendedor", "Chofer", "Almacenista", "Administrativo", "Auxiliar", "Contador", "Programador", "Encargado", "Aux Sistemas", "Arquitecto", "Aux Contable"];
-  const horasExtrasOpciones = ["60", "70", "80", "100"];
+  const horasExtrasOptions = ["60", "70", "80", "100"];
 
-  const handleAltaEmpleado = async () => {
-    const camposObligatorios = [
-      'numero_empleado', 'nombres', 'apellido_paterno', 'apellido_materno',
-      'sexo', 'sucursal', 'fecha_ingreso', 'sueldo_quincenal',
-      'horas_extras', 'puesto'
-    ];
+  useEffect(() => {
+    const fetchUsuario = async () => {
+      const { data: authData } = await supabase.auth.getUser();
 
-    for (const campo of camposObligatorios) {
-      if (!empleado[campo] || empleado[campo].toString().trim() === '') {
-        return alert(`El campo "${campo.replace('_', ' ')}" es obligatorio.`);
+      if (authData.user) {
+        const { data: usuarioData, error } = await supabase
+          .from("usuarios")
+          .select("*")
+          .eq("email", authData.user.email)
+          .single();
+
+        if (usuarioData) {
+          setUser(usuarioData);
+          setView("dashboard");
+          cargarEmpleados(usuarioData);
+        } else {
+          console.error("No se encontró el usuario en la tabla usuarios", error);
+        }
       }
-    }
-
-    if (!empleadoFoto) {
-      return alert("Por favor selecciona una foto");
-    }
-
-    const nombreArchivo = `foto-${empleado.numero_empleado}-${empleado.sucursal}.jpg`;
-    const { error: uploadError } = await supabase.storage
-      .from("empleadosfotos")
-      .upload(nombreArchivo, empleadoFoto, { upsert: true });
-
-    if (uploadError) {
-      console.log(uploadError);
-      return alert("Error al subir la foto");
-    }
-
-    const { data, error: urlError } = await supabase.storage
-      .from("empleadosfotos")
-      .createSignedUrl(nombreArchivo, 3600);
-
-    if (urlError) {
-      console.log(urlError);
-      return alert("Error al generar URL de imagen");
-    }
-
-    const camposTexto = ["nombres", "apellido_paterno", "apellido_materno", "sexo", "puesto", "sucursal"];
-    const empleadoFormateado = { ...empleado };
-    camposTexto.forEach((campo) => {
-      if (empleadoFormateado[campo]) {
-        empleadoFormateado[campo] = empleadoFormateado[campo].toUpperCase();
-      }
-    });
-
-    const nuevoEmpleado = {
-      ...empleadoFormateado,
-      foto_url: data.signedUrl,
-      creado_por: usuario?.id || null,
     };
 
-    const { error } = await supabase.from("empleados").insert([nuevoEmpleado]);
+    fetchUsuario();
+  }, []);
 
-    if (error) {
-      console.log("Error Supabase:", error);
-      alert("Error al guardar empleado");
-    } else {
-      alert("Empleado guardado correctamente");
-      volver();
+  const handleLogin = async () => {
+    const { error, data } = await supabase.auth.signInWithPassword({
+      email: form.email,
+      password: form.password,
+    });
+    if (error) return alert("Error al iniciar sesión");
+
+    const { data: usuarioData, error: fetchError } = await supabase
+      .from("usuarios")
+      .select("*")
+      .eq("email", form.email)
+      .single();
+
+    if (fetchError || !usuarioData) return alert("No se encontró el usuario");
+
+    setUser(usuarioData);
+    setView("dashboard");
+    await cargarEmpleados(usuarioData);
+  };
+
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+    setUser(null);
+    setView("login");
+  };
+
+  const cargarEmpleados = async (usuario) => {
+    let query = supabase.from("empleados").select("*");
+
+    if (usuario?.rol === "administrador") {
+      query = query.or(`creado_por.eq.${usuario.id},sucursal.eq.${usuario.sucursal}`);
+    }
+
+    const { data, error } = await query;
+
+    if (!error) {
+      const ordenados = data.sort((a, b) => a.apellido_paterno.localeCompare(b.apellido_paterno));
+      setEmpleados(ordenados);
     }
   };
 
-  return (
-    <div className="min-h-screen bg-green-50 p-6">
-      <button onClick={volver} className="mb-4 text-green-700 underline">← Volver al inicio</button>
-      <h2 className="text-2xl font-bold text-green-800 mb-4">Alta de empleado</h2>
-      <div className="grid gap-4 max-w-xl">
-        <input type="text" placeholder="Número de empleado" className="p-2 border rounded" value={empleado.numero_empleado} onChange={(e) => setEmpleado({ ...empleado, numero_empleado: e.target.value })} />
-        <input type="text" placeholder="Nombre(s)" className="p-2 border rounded" value={empleado.nombres} onChange={(e) => setEmpleado({ ...empleado, nombres: e.target.value })} />
-        <input type="text" placeholder="Apellido paterno" className="p-2 border rounded" value={empleado.apellido_paterno} onChange={(e) => setEmpleado({ ...empleado, apellido_paterno: e.target.value })} />
-        <input type="text" placeholder="Apellido materno" className="p-2 border rounded" value={empleado.apellido_materno} onChange={(e) => setEmpleado({ ...empleado, apellido_materno: e.target.value })} />
+  const filtrar = (emp) => {
+    const texto = filtro.toLowerCase();
+    return (
+      emp.numero_empleado.toString().includes(texto) ||
+      emp.nombres.toLowerCase().includes(texto) ||
+      emp.apellido_paterno.toLowerCase().includes(texto) ||
+      emp.apellido_materno.toLowerCase().includes(texto) ||
+      emp.sucursal.toLowerCase().includes(texto) ||
+      emp.puesto.toLowerCase().includes(texto)
+    );
+  };
 
-        <select className="p-2 border rounded" value={empleado.sexo} onChange={(e) => setEmpleado({ ...empleado, sexo: e.target.value })}>
-          <option value="">Selecciona sexo</option>
-          <option value="Hombre">Hombre</option>
-          <option value="Mujer">Mujer</option>
-        </select>
-
-        <select className="p-2 border rounded" value={empleado.sucursal} onChange={(e) => setEmpleado({ ...empleado, sucursal: e.target.value })}>
-          <option value="">Selecciona una sucursal</option>
-          {sucursales.map((suc) => <option key={suc} value={suc}>{suc}</option>)}
-        </select>
-
-        <input type="date" className="p-2 border rounded" value={empleado.fecha_ingreso} onChange={(e) => setEmpleado({ ...empleado, fecha_ingreso: e.target.value })} />
-        <input type="number" placeholder="Sueldo quincenal" className="p-2 border rounded" value={empleado.sueldo_quincenal} onChange={(e) => setEmpleado({ ...empleado, sueldo_quincenal: e.target.value })} />
-
-        <select className="p-2 border rounded" value={empleado.horas_extras} onChange={(e) => setEmpleado({ ...empleado, horas_extras: e.target.value })}>
-          <option value="">Selecciona horas extras</option>
-          {horasExtrasOpciones.map((h) => <option key={h} value={h}>{h}</option>)}
-        </select>
-
-        <select className="p-2 border rounded" value={empleado.puesto} onChange={(e) => setEmpleado({ ...empleado, puesto: e.target.value })}>
-          <option value="">Selecciona puesto</option>
-          {puestos.map((p) => <option key={p} value={p}>{p}</option>)}
-        </select>
-
-        <input type="file" accept="image/*" onChange={(e) => setEmpleadoFoto(e.target.files[0])} />
-        <button onClick={handleAltaEmpleado} className="bg-green-700 text-white p-2 rounded hover:bg-green-800">Guardar empleado</button>
+  if (view === "login") {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-green-100 to-green-300">
+        <div className="bg-white p-8 rounded-2xl shadow-lg w-full max-w-sm space-y-4">
+          <h1 className="text-2xl font-bold text-center text-green-700">Iniciar Sesión</h1>
+          <input type="email" placeholder="Correo electrónico" className="w-full p-2 border rounded" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} />
+          <input type="password" placeholder="Contraseña" className="w-full p-2 border rounded" value={form.password} onChange={(e) => setForm({ ...form, password: e.target.value })} />
+          <button onClick={handleLogin} className="w-full bg-green-600 hover:bg-green-700 text-white p-2 rounded">Entrar</button>
+        </div>
       </div>
+    );
+  }
+
+  if (view === "dashboard") {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-green-100 to-green-300 flex flex-col items-center justify-center px-4 py-10">
+        <div className="bg-white shadow-lg rounded-2xl p-6 max-w-md w-full space-y-6">
+          <h1 className="text-2xl font-bold text-green-700 text-center">Panel de Administración</h1>
+
+          <button onClick={() => setView("alta_empleado")} className="w-full bg-green-600 hover:bg-green-700 text-white py-2 px-4 rounded-lg text-lg shadow transition duration-200">
+            📋 Alta de empleado
+          </button>
+
+          <button onClick={() => { cargarEmpleados(user); setView("consulta_empleados"); }} className="w-full bg-green-600 hover:bg-green-700 text-white py-2 px-4 rounded-lg text-lg shadow transition duration-200">
+            🔍 Consultar empleados
+          </button>
+
+          {user?.rol === 'superusuario' && (
+            <>
+              <button onClick={() => setView("asignar_administrador")} className="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-lg text-lg shadow transition duration-200">
+                🛠 Asignar administrador
+              </button>
+              <button onClick={() => setView("convertir_importados")} className="w-full bg-purple-600 hover:bg-purple-700 text-white py-2 px-4 rounded-lg text-lg shadow transition duration-200">
+                🔄 Convertir empleados importados
+              </button>
+            </>
+          )}
+
+          <button onClick={handleLogout} className="w-full bg-red-600 hover:bg-red-700 text-white py-2 px-4 rounded-lg text-lg shadow transition duration-200">
+            🚪 Cerrar sesión
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  if (view === "alta_empleado") return <AltaEmpleado volver={() => setView("dashboard")} usuario={user} />;
+
+  if (view === "consulta_empleados") return (
+    <ConsultaEmpleados empleados={empleados} filtro={filtro} setFiltro={setFiltro} filtrar={filtrar} setView={setView} setEmpleadoSeleccionado={setEmpleadoSeleccionado} usuario={user} />
+  );
+
+  if (view === "asignar_administrador") return <AsignarAdministrador volver={() => setView("dashboard")} />;
+
+  if (view === "convertir_importados") return <ConvertirImportados volver={() => setView("dashboard")} usuario={user} />;
+
+  return (
+    <div className="min-h-screen flex items-center justify-center text-red-600">
+      ⚠️ Vista no válida. Verifica el estado de la aplicación.
     </div>
   );
 }
