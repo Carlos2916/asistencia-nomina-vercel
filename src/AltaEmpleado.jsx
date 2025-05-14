@@ -19,19 +19,13 @@ export default function AltaEmpleado({ volver }) {
 
   const sucursales = ["Cabos", "Costa", "Bonfil", "Puerto", "Cedis", "Cedis Adm", "Chichen"];
   const puestos = ["Gerente", "Supervisor", "Vendedor", "Chofer", "Almacenista", "Administrativo", "Auxiliar", "Contador", "Programador", "Encargado", "Aux Sistemas", "Arquitecto", "Aux Contable"];
+  const horasExtrasOpciones = ["60", "70", "80", "100"];
 
   const handleAltaEmpleado = async () => {
     const camposObligatorios = [
-      'numero_empleado',
-      'nombres',
-      'apellido_paterno',
-      'apellido_materno',
-      'sexo',
-      'sucursal',
-      'fecha_ingreso',
-      'sueldo_quincenal',
-      'horas_extras',
-      'puesto'
+      'numero_empleado', 'nombres', 'apellido_paterno', 'apellido_materno',
+      'sexo', 'sucursal', 'fecha_ingreso', 'sueldo_quincenal',
+      'horas_extras', 'puesto'
     ];
 
     for (const campo of camposObligatorios) {
@@ -44,7 +38,7 @@ export default function AltaEmpleado({ volver }) {
       return alert("Por favor selecciona una foto");
     }
 
-    const nombreArchivo = `foto-${empleado.numero_empleado}.jpg`;
+    const nombreArchivo = `foto-${empleado.numero_empleado}-${empleado.sucursal}.jpg`;
     const { error: uploadError } = await supabase.storage
       .from("empleadosfotos")
       .upload(nombreArchivo, empleadoFoto, { upsert: true });
@@ -104,12 +98,17 @@ export default function AltaEmpleado({ volver }) {
         </select>
 
         <select className="p-2 border rounded" value={empleado.sucursal} onChange={(e) => setEmpleado({ ...empleado, sucursal: e.target.value })}>
+          <option value="">Selecciona una sucursal</option>
           {sucursales.map((suc) => <option key={suc} value={suc}>{suc}</option>)}
         </select>
 
         <input type="date" className="p-2 border rounded" value={empleado.fecha_ingreso} onChange={(e) => setEmpleado({ ...empleado, fecha_ingreso: e.target.value })} />
         <input type="number" placeholder="Sueldo quincenal" className="p-2 border rounded" value={empleado.sueldo_quincenal} onChange={(e) => setEmpleado({ ...empleado, sueldo_quincenal: e.target.value })} />
-        <input type="number" placeholder="Horas extras" className="p-2 border rounded" value={empleado.horas_extras} onChange={(e) => setEmpleado({ ...empleado, horas_extras: e.target.value })} />
+
+        <select className="p-2 border rounded" value={empleado.horas_extras} onChange={(e) => setEmpleado({ ...empleado, horas_extras: e.target.value })}>
+          <option value="">Selecciona horas extras</option>
+          {horasExtrasOpciones.map((h) => <option key={h} value={h}>{h}</option>)}
+        </select>
 
         <select className="p-2 border rounded" value={empleado.puesto} onChange={(e) => setEmpleado({ ...empleado, puesto: e.target.value })}>
           <option value="">Selecciona puesto</option>
